@@ -73,7 +73,7 @@ DRAM_ATTR static const lcd_init_cmd_t lcd_init_cmds[]={
 };
 
 /* Uses spi_device_transmit, which waits until the transfer is complete. */
-void ili9341_command(spi_device_handle_t spi, const uint8_t command)
+static void ili9341_command(spi_device_handle_t spi, const uint8_t command)
 {
     spi_transaction_t transaction;
 
@@ -106,7 +106,7 @@ void ili9341_pre_callback(spi_transaction_t *transaction)
     gpio_set_level(PIN_NUM_DC, dc);
 }
 
-void ili9341_wait(spi_device_handle_t spi)
+static void ili9341_wait(spi_device_handle_t spi)
 {
     spi_transaction_t *rtrans;
 

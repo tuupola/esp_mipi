@@ -49,7 +49,6 @@ typedef struct {
 
 void ili9431_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint16_t *bitmap);
 void ili9431_putpixel(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t colour);
-void ili9341_wait(spi_device_handle_t spi);
 void ili9341_init(spi_device_handle_t *spi);
 void ili9341_pre_callback(spi_transaction_t *transaction);
 
