@@ -11,14 +11,11 @@ First initialise both ESP SPI driver and ILI9341 itself. SPI speed and pins can 
 ```c
 #include <driver/spi_master.h>
 
-#include "spi.h"
 #include "ili9341.h"
 
 spi_device_handle_t spi;
 
-spi_master_init(&spi);
 ili9341_init(&spi);
-
 ili9431_putpixel(spi, x0, y0, color);
 ili9431_blit(spi, x0, y0, w, h, &bitmap)
 ```
