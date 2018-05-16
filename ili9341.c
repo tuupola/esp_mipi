@@ -148,7 +148,7 @@ void ili9341_init(spi_device_handle_t *spi)
     gpio_set_level(PIN_NUM_BCKL, 1);
 }
 
-void ili9431_bitmap(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint16_t *bitmap)
+void ili9431_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint16_t *bitmap)
 {
     int x;
 
@@ -201,6 +201,6 @@ void ili9431_bitmap(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t 
 
 void ili9431_putpixel(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t colour)
 {
-    ili9431_bitmap(spi, x1, y1, 1, 1, &colour);
+    ili9431_blit(spi, x1, y1, 1, 1, &colour);
 }
 
