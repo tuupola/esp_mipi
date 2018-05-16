@@ -26,7 +26,7 @@ SOFTWARE.
 
 */
 
-#include "driver/spi_master.h"
+#include <driver/spi_master.h>
 
 #define SPI_MAX_TRANSFER_SIZE   (320 * 240 * 2 + 8)
 

@@ -41,11 +41,7 @@ void spi_master_init(spi_device_handle_t *spi)
         .max_transfer_sz = SPI_MAX_TRANSFER_SIZE /* Max transfer size in bytes. */
     };
     spi_device_interface_config_t devcfg = {
-#ifdef CONFIG_LCD_OVERCLOCK
-        .clock_speed_hz = 48 * 1000 * 1000,
-#else
-        .clock_speed_hz = 10 * 1000 * 1000,
-#endif
+        .clock_speed_hz = CONFIG_SPI_CLOCK_SPEED_HZ,
         .mode = 0,
         .spics_io_num = PIN_NUM_CS,
         .queue_size = 64,
