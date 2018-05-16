@@ -54,10 +54,10 @@ DRAM_ATTR static const lcd_init_cmd_t lcd_init_cmds[]={
     {0xC1, {0x11}, 1},
     {0xC5, {0x35, 0x3E}, 2},
     {0xC7, {0xBE}, 1},
-    //{0x36, {0x28}, 1},
-    {0x36, {0x08}, 1}, // for M5Stack
-    {0x3A, {0x55}, 1},
-    {0xB1, {0x00, 0x1B}, 2},
+    //{ILI9341_MADCTL, {0x28}, 1},
+    {ILI9341_MADCTL, {0x08}, 1}, // for M5Stack
+    {ILI9341_PIXFMT, {0x55}, 1}, // 0b01010101 ie. 16 bits per pixel
+    {ILI9341_FRMCTR1, {0x00, 0x1B}, 2},
     {0xF2, {0x08}, 1},
     {0x26, {0x01}, 1},
     {0xE0, {0x1F, 0x1A, 0x18, 0x0A, 0x0F, 0x06, 0x45, 0X87, 0x32, 0x0A, 0x07, 0x02, 0x07, 0x05, 0x00}, 15},
@@ -109,7 +109,6 @@ void ili9341_pre_callback(spi_transaction_t *transaction)
 void ili9341_wait(spi_device_handle_t spi)
 {
     spi_transaction_t *rtrans;
-    esp_err_t ret;
 
     /* TODO: This should be all transactions. */
     for (uint8_t i = 0; i <= 5; i++) {
