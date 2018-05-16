@@ -3,7 +3,7 @@
 This code is based on Espressif provided SPI Master example which was
 released to Public Domain: https://goo.gl/ksC2Ln
 
-
+Copyright (c) 2017-2018 Espressif Systems (Shanghai) PTE LTD
 Copyright (c) 2018 Mika Tuupola
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
