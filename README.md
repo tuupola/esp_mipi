@@ -6,7 +6,7 @@ ESP ILI9341 display driver. Support M5Stack out of the box. Everything is still 
 
 ## Usage
 
-First initialise both ESP SPI driver and ILI9341 itself. See for pin settings. All default settings will work with M5Stack. Other than that the driver provides only putpixel and blit functions. It is meant to be used with external graphics library such as [copepod](https://github.com/tuupola/copepod).
+First initialise both ESP SPI driver and ILI9341 itself. SPI speed and pins can be changed with `$ make menuconfig`. Default settings will work with M5Stack. Other than that the driver provides only putpixel and blit functions. It is meant to be used with external graphics library such as [copepod](https://github.com/tuupola/copepod).
 
 ```c
 #include <driver/spi_master.h>
