@@ -27,10 +27,7 @@ SOFTWARE.
 */
 
 #include <stdint.h>
-
 #include <driver/spi_master.h>
-
-#include "spi.h"
 
 #define PIN_NUM_MISO 19
 #define PIN_NUM_MOSI 23
@@ -41,6 +38,8 @@ SOFTWARE.
 #define PIN_NUM_RST  33
 #define PIN_NUM_BCKL 32
 
+#define SPI_MAX_TRANSFER_SIZE   (320 * 240 * 2 + 8)
+
 typedef struct {
     uint8_t cmd;
     uint8_t data[16];
@@ -50,7 +49,6 @@ typedef struct {
 void ili9431_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint16_t *bitmap);
 void ili9431_putpixel(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t colour);
 void ili9341_init(spi_device_handle_t *spi);
-void ili9341_pre_callback(spi_transaction_t *transaction);
 
 #define ILI9341_NOP        0x00
 #define ILI9341_SWRESET    0x01

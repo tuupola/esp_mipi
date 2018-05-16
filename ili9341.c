@@ -100,7 +100,7 @@ static void ili9341_data(spi_device_handle_t spi, const uint8_t *data, uint16_t 
 
 /* This function is called (in irq context!) just before a transmission starts. */
 /* It will set the DC line to the value indicated in the user field. */
-void ili9341_pre_callback(spi_transaction_t *transaction)
+static void ili9341_pre_callback(spi_transaction_t *transaction)
 {
     int dc=(int)transaction->user;
     gpio_set_level(CONFIG_ILI9341_PIN_DC, dc);
@@ -117,9 +117,34 @@ static void ili9341_wait(spi_device_handle_t spi)
     }
 }
 
+static void ili9431_spi_master_init(spi_device_handle_t *spi)
+{
+    spi_bus_config_t buscfg = {
+        .miso_io_num = CONFIG_ILI9341_PIN_MISO,
+        .mosi_io_num = CONFIG_ILI9341_PIN_MOSI,
+        .sclk_io_num = CONFIG_ILI9341_PIN_CLK,
+        .quadwp_io_num = -1,
+        .quadhd_io_num = -1,
+        .max_transfer_sz = SPI_MAX_TRANSFER_SIZE /* Max transfer size in bytes. */
+    };
+    spi_device_interface_config_t devcfg = {
+        .clock_speed_hz = CONFIG_SPI_CLOCK_SPEED_HZ,
+        .mode = 0,
+        .spics_io_num = CONFIG_ILI9341_PIN_CS,
+        .queue_size = 64,
+        .pre_cb = ili9341_pre_callback, /* Handles D/C line. */
+        .flags = SPI_DEVICE_NO_DUMMY
+    };
+    ESP_ERROR_CHECK(spi_bus_initialize(HSPI_HOST, &buscfg, 1));
+    ESP_ERROR_CHECK(spi_bus_add_device(HSPI_HOST, &devcfg, spi));
+}
+
 void ili9341_init(spi_device_handle_t *spi)
 {
     uint8_t cmd = 0;
+
+    /* Init SPI driver. */
+    ili9431_spi_master_init(spi);
 
     /* Init non spi gpio. */
     gpio_set_direction(CONFIG_ILI9341_PIN_DC, GPIO_MODE_OUTPUT);
