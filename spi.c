@@ -33,9 +33,9 @@ SOFTWARE.
 void spi_master_init(spi_device_handle_t *spi)
 {
     spi_bus_config_t buscfg = {
-        .miso_io_num = PIN_NUM_MISO,
-        .mosi_io_num = PIN_NUM_MOSI,
-        .sclk_io_num = PIN_NUM_CLK,
+        .miso_io_num = CONFIG_ILI9341_PIN_MISO,
+        .mosi_io_num = CONFIG_ILI9341_PIN_MOSI,
+        .sclk_io_num = CONFIG_ILI9341_PIN_CLK,
         .quadwp_io_num = -1,
         .quadhd_io_num = -1,
         .max_transfer_sz = SPI_MAX_TRANSFER_SIZE /* Max transfer size in bytes. */
@@ -43,7 +43,7 @@ void spi_master_init(spi_device_handle_t *spi)
     spi_device_interface_config_t devcfg = {
         .clock_speed_hz = CONFIG_SPI_CLOCK_SPEED_HZ,
         .mode = 0,
-        .spics_io_num = PIN_NUM_CS,
+        .spics_io_num = CONFIG_ILI9341_PIN_CS,
         .queue_size = 64,
         .pre_cb = ili9341_pre_callback, /* Handles D/C line. */
         .flags = SPI_DEVICE_NO_DUMMY

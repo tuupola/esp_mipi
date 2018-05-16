@@ -103,7 +103,7 @@ static void ili9341_data(spi_device_handle_t spi, const uint8_t *data, uint16_t 
 void ili9341_pre_callback(spi_transaction_t *transaction)
 {
     int dc=(int)transaction->user;
-    gpio_set_level(PIN_NUM_DC, dc);
+    gpio_set_level(CONFIG_ILI9341_PIN_DC, dc);
 }
 
 static void ili9341_wait(spi_device_handle_t spi)
@@ -122,14 +122,14 @@ void ili9341_init(spi_device_handle_t *spi)
     uint8_t cmd = 0;
 
     /* Init non spi gpio. */
-    gpio_set_direction(PIN_NUM_DC, GPIO_MODE_OUTPUT);
-    gpio_set_direction(PIN_NUM_RST, GPIO_MODE_OUTPUT);
-    gpio_set_direction(PIN_NUM_BCKL, GPIO_MODE_OUTPUT);
+    gpio_set_direction(CONFIG_ILI9341_PIN_DC, GPIO_MODE_OUTPUT);
+    gpio_set_direction(CONFIG_ILI9341_PIN_RST, GPIO_MODE_OUTPUT);
+    gpio_set_direction(CONFIG_ILI9341_PIN_BCKL, GPIO_MODE_OUTPUT);
 
     /* Reset the display. */
-    gpio_set_level(PIN_NUM_RST, 0);
+    gpio_set_level(CONFIG_ILI9341_PIN_RST, 0);
     vTaskDelay(100 / portTICK_RATE_MS);
-    gpio_set_level(PIN_NUM_RST, 1);
+    gpio_set_level(CONFIG_ILI9341_PIN_RST, 1);
     vTaskDelay(100 / portTICK_RATE_MS);
 
     ESP_LOGD(TAG, "Initialize the display.");
@@ -145,7 +145,7 @@ void ili9341_init(spi_device_handle_t *spi)
     }
 
     /* Enable backlight. */
-    gpio_set_level(PIN_NUM_BCKL, 1);
+    gpio_set_level(CONFIG_ILI9341_PIN_BCKL, 1);
 }
 
 void ili9431_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint16_t *bitmap)
