@@ -96,6 +96,14 @@ void ili9341_init(spi_device_handle_t *spi);
 #define ILI9341_VMCTR1     0xC5
 #define ILI9341_VMCTR2     0xC7
 
+#define ILI9341_PWCTRB     0xCF
+#define ILI9341_PWCTRA     0xCB
+#define ILI9341_PWONCTR    0xED
+#define ILI9341_DRVTCTRA   0xE8
+
+#define ILI9341_TMCTRA     0xEA
+#define ILI9341_PUMPRTC    0xF7
+
 #define ILI9341_RDID1      0xDA
 #define ILI9341_RDID2      0xDB
 #define ILI9341_RDID3      0xDC
@@ -103,3 +111,6 @@ void ili9341_init(spi_device_handle_t *spi);
 
 #define ILI9341_GMCTRP1    0xE0
 #define ILI9341_GMCTRN1    0xE1
+
+#define ILI9341_3GENABLE   0xF2
+#define ILI9341_ENTRYMODE  0xB7
