@@ -43,6 +43,7 @@ SOFTWARE.
 #include "ili9341.h"
 
 static const char *TAG = "ili9341";
+static SemaphoreHandle_t mutex;
 
 DRAM_ATTR static const lcd_init_cmd_t lcd_init_cmds[]={
     /* Power contorl B, power control = 0, DC_ENA = 1 */
@@ -177,6 +178,8 @@ void ili9341_init(spi_device_handle_t *spi)
 {
     uint8_t cmd = 0;
 
+    mutex = xSemaphoreCreateMutex();
+
     /* Init SPI driver. */
     ili9431_spi_master_init(spi);
 
@@ -217,6 +220,8 @@ void ili9431_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w,
     static spi_transaction_t trans[6];
     uint32_t size = w * h;
 
+    xSemaphoreTake(mutex, portMAX_DELAY);
+
     /* In theory, it's better to initialize trans and data only once and hang */
     /* on to the initialized variables. We allocate them on the stack, so we need */
     /* to re-init them each call. */
@@ -254,8 +259,9 @@ void ili9431_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w,
     }
 
     /* Could do stuff here... */
-
     ili9341_wait(spi);
+
+    xSemaphoreGive(mutex);
 }
 
 void ili9431_putpixel(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t colour)
