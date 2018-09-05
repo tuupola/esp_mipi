@@ -212,6 +212,10 @@ void ili9341_init(spi_device_handle_t *spi)
 
 void ili9431_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint16_t *bitmap)
 {
+    if (0 == w || 0 == h) {
+        return;
+    }
+
     int x;
 
     int32_t x2 = x1 + w - 1;
@@ -268,4 +272,3 @@ void ili9431_putpixel(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_
 {
     ili9431_blit(spi, x1, y1, 1, 1, &colour);
 }
-
