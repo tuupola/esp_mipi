@@ -1,4 +1,4 @@
-menu "ILI9341 configuration"
+menu "ST7735S configuration"
 
 config SPI_CLOCK_SPEED_HZ
     int "SPI clock speed in Hz"
@@ -7,66 +7,66 @@ config SPI_CLOCK_SPEED_HZ
     help
         SPI clock speed in Hz. If you have problems try a lower value.
 
-config ILI9341_MADCTL
+config ST7735S_MADCTL
     hex "Display orientation"
     default 0x00
     help
-        See memory access control in the datasheet. Defaults are ok for M5Stack.
+        See memory access control in the datasheet. Defaults are ok for M5Stick.
 
-config ILI9341_DISPLAY_WIDTH
+config ST7735S_DISPLAY_WIDTH
     int "Display width in pixels"
-    default 320
+    default 80
     help
-        Default is ok for M5Stack.
+        Default is ok for M5Stick.
 
-config ILI9341_DISPLAY_HEIGHT
+config ST7735S_DISPLAY_HEIGHT
     int "Display height in pixels"
-    default 240
+    default 160
     help
-        Default is ok for M5Stack.
+        Default is ok for M5Stick.
 
 
-config ILI9341_PIN_MISO
+config ST7735S_PIN_MISO
     int "MISO pin number"
     default 19
     help
-        MISO pin number. Defaults are ok for M5Stack.
+        MISO pin number. Defaults are ok for M5Stick.
 
-config ILI9341_PIN_MOSI
+config ST7735S_PIN_MOSI
     int "MOSI pin number"
     default 23
     help
-        MOSI pin number. Defaults are ok for M5Stack.
+        MOSI pin number. Defaults are ok for M5Stick.
 
-config ILI9341_PIN_CLK
+config ST7735S_PIN_CLK
     int "CLK pin number"
     default 18
     help
-        CLK pin number. Defaults are ok for M5Stack.
+        CLK pin number. Defaults are ok for M5Stick.
 
-config ILI9341_PIN_CS
+config ST7735S_PIN_CS
     int "CS pin number"
     default 14
     help
-        CS pin number. Defaults are ok for M5Stack.
+        CS pin number. Defaults are ok for M5Stick.
 
-config ILI9341_PIN_DC
+config ST7735S_PIN_DC
     int "DC pin number"
     default 27
     help
-        DC pin number. Defaults are ok for M5Stack.
+        DC pin number. Defaults are ok for M5Stick.
 
 
-config ILI9341_PIN_RST
+config ST7735S_PIN_RST
     int "RST pin number"
     default 33
     help
-        RST pin number. Defaults are ok for M5Stack.
+        RST pin number. Defaults are ok for M5Stick.
 
-config ILI9341_PIN_BCKL
+config ST7735S_PIN_BCKL
     int "Backlight pin number"
     default 32
     help
-        Backlight pin number. Defaults are ok for M5Stack.
+        Backlight pin number. Defaults are ok for M5Stick.
 
 endmenu
