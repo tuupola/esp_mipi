@@ -41,9 +41,12 @@ SOFTWARE.
 #include <driver/gpio.h>
 #include <esp_log.h>
 
+#include "sdkconfig.h"
 #include "ili9341.h"
 
 static const char *TAG = "ili9341";
+static const uint8_t DELAY_BIT = 1 << 7;
+
 static SemaphoreHandle_t mutex;
 
 DRAM_ATTR static const lcd_init_cmd_t lcd_init_cmds[]={
@@ -75,9 +78,8 @@ DRAM_ATTR static const lcd_init_cmd_t lcd_init_cmds[]={
     {ILI9341_VMCTR1, {0x35, 0x3E}, 2},
     /* VCOM control 2, VCOMH=VMH-2, VCOML=VML-2 */
     {ILI9341_VMCTR2, {0xBE}, 1},
-    /* Memory access contorl, MX=MY=0, MV=1, ML=0, BGR=1, MH=0 */
-    //{ILI9341_MADCTL, {0x28}, 1},
-    {ILI9341_MADCTL, {0x08}, 1}, // for M5Stack
+    /* Memory access control */
+    {ILI9341_MADCTL, {CONFIG_ILI9341_MADCTL}, 1},
     /* Pixel format, 16bits/pixel for RGB/MCU interface */
     {ILI9341_PIXFMT, {0x55}, 1}, // 0b01010101 ie. 16 bits per pixel
     /* Frame rate control, f=fosc, 70Hz fps */
@@ -100,10 +102,11 @@ DRAM_ATTR static const lcd_init_cmd_t lcd_init_cmds[]={
     {ILI9341_ENTRYMODE, {0x07}, 1},
     /* Display function control */
     {ILI9341_DFUNCTR, {0x0A, 0x82, 0x27, 0x00}, 4},
-    /* Sleep out */
-    {ILI9341_SLPOUT, {0}, 0x80},
-    /* Display on */
-    {ILI9341_DISPON, {0}, 0x80},
+    /* Sleep out bit */
+    {ILI9341_SLPOUT, {0}, 0 | DELAY_BIT},
+    /* Display on bit */
+    {ILI9341_DISPON, {0}, 0 | DELAY_BIT},
+
     /* End of commands . */
     {0, {0}, 0xff},
 };
@@ -195,13 +198,13 @@ void ili9341_init(spi_device_handle_t *spi)
     gpio_set_level(CONFIG_ILI9341_PIN_RST, 1);
     vTaskDelay(100 / portTICK_RATE_MS);
 
-    ESP_LOGD(TAG, "Initialize the display.");
+    ESP_LOGI(TAG, "Initialize the display.");
 
     /* Send all the commands. */
     while (lcd_init_cmds[cmd].databytes != 0xff) { /* 0xff is the end marker. */
         ili9341_command(*spi, lcd_init_cmds[cmd].cmd);
         ili9341_data(*spi, lcd_init_cmds[cmd].data, lcd_init_cmds[cmd].databytes & 0x1F);
-        if (lcd_init_cmds[cmd].databytes & 0x80) {
+        if (lcd_init_cmds[cmd].databytes & DELAY_BIT) {
             vTaskDelay(100 / portTICK_RATE_MS);
         }
         cmd++;

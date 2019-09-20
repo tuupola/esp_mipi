@@ -29,16 +29,13 @@ SOFTWARE.
 #include <stdint.h>
 #include <driver/spi_master.h>
 
-#define PIN_NUM_MISO 19
-#define PIN_NUM_MOSI 23
-#define PIN_NUM_CLK  18
-#define PIN_NUM_CS   14
+#include "sdkconfig.h"
 
-#define PIN_NUM_DC   27
-#define PIN_NUM_RST  33
-#define PIN_NUM_BCKL 32
+#define DISPLAY_WIDTH   (CONFIG_ILI9341_DISPLAY_WIDTH)
+#define DISPLAY_HEIGHT  (CONFIG_ILI9341_DISPLAY_HEIGHT)
+#define DISPLAY_DEPTH   (16)
 
-#define SPI_MAX_TRANSFER_SIZE   (320 * 240 * 2 + 8)
+#define SPI_MAX_TRANSFER_SIZE   (DISPLAY_WIDTH * DISPLAY_HEIGHT * DISPLAY_DEPTH)
 
 typedef struct {
     uint8_t cmd;
@@ -79,6 +76,15 @@ void ili9341_init(spi_device_handle_t *spi);
 
 #define ILI9341_PTLAR      0x30
 #define ILI9341_MADCTL     0x36
+
+#define ILI9341_MADCTL_MY  0x80 /* Row address order */
+#define ILI9341_MADCTL_MX  0x40 /* Column address order */
+#define ILI9341_MADCTL_MV  0x20 /* Row / columnd exchange */
+#define ILI9341_MADCTL_ML  0x10 /* Vertical refresh order */
+#define ILI9341_MADCTL_RGB 0x00 /* RGB */
+#define ILI9341_MADCTL_BGR 0x08 /* BGR */
+#define ILI9341_MADCTL_MH  0x04 /* Horizontal refresh order */
+
 #define ILI9341_VSCRSADD   0x37
 #define ILI9341_PIXFMT     0x3A
 
