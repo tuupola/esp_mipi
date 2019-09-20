@@ -156,7 +156,10 @@ void st7735s_init(spi_device_handle_t *spi)
     /* Init non spi gpio. */
     gpio_set_direction(CONFIG_ST7735S_PIN_DC, GPIO_MODE_OUTPUT);
     gpio_set_direction(CONFIG_ST7735S_PIN_RST, GPIO_MODE_OUTPUT);
-    gpio_set_direction(CONFIG_ST7735S_PIN_BCKL, GPIO_MODE_OUTPUT);
+
+    if (CONFIG_ST7735S_PIN_BCKL > 0) {
+        gpio_set_direction(CONFIG_ST7735S_PIN_BCKL, GPIO_MODE_OUTPUT);
+    }
 
     /* Reset the display. */
     gpio_set_level(CONFIG_ST7735S_PIN_RST, 0);
@@ -187,6 +190,9 @@ void st7735s_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w,
     }
 
     int x;
+
+    x1 = x1 + CONFIG_ST7735S_OFFSET_X;
+    y1 = y1 + CONFIG_ST7735S_OFFSET_Y;
 
     int32_t x2 = x1 + w - 1;
     int32_t y2 = y1 + h - 1;
