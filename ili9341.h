@@ -40,7 +40,7 @@ SOFTWARE.
 typedef struct {
     uint8_t cmd;
     uint8_t data[16];
-    uint8_t databytes; //No of data in data; bit 7 = delay after set; 0xFF = end of cmds.
+    uint8_t bytes;
 } lcd_init_cmd_t;
 
 void ili9431_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint16_t *bitmap);

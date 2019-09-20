@@ -27,7 +27,6 @@ SOFTWARE.
 
 */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -49,7 +48,7 @@ static const uint8_t DELAY_BIT = 1 << 7;
 
 static SemaphoreHandle_t mutex;
 
-DRAM_ATTR static const lcd_init_cmd_t lcd_init_cmds[]={
+DRAM_ATTR static const lcd_init_cmd_t ili_init_commands[]={
     /* Power contorl B, power control = 0, DC_ENA = 1 */
     {ILI9341_PWCTRB, {0x00, 0x83, 0X30}, 3},
     /* Power on sequence control,
@@ -164,14 +163,16 @@ static void ili9431_spi_master_init(spi_device_handle_t *spi)
         .sclk_io_num = CONFIG_ILI9341_PIN_CLK,
         .quadwp_io_num = -1,
         .quadhd_io_num = -1,
-        .max_transfer_sz = SPI_MAX_TRANSFER_SIZE /* Max transfer size in bytes. */
+        /* Max transfer size in bytes */
+        .max_transfer_sz = SPI_MAX_TRANSFER_SIZE
     };
     spi_device_interface_config_t devcfg = {
         .clock_speed_hz = CONFIG_SPI_CLOCK_SPEED_HZ,
         .mode = 0,
         .spics_io_num = CONFIG_ILI9341_PIN_CS,
         .queue_size = 64,
-        .pre_cb = ili9341_pre_callback, /* Handles D/C line. */
+        /* Handles the D/C line */
+        .pre_cb = ili9341_pre_callback,
         .flags = SPI_DEVICE_NO_DUMMY
     };
     ESP_ERROR_CHECK(spi_bus_initialize(HSPI_HOST, &buscfg, 1));
@@ -184,7 +185,7 @@ void ili9341_init(spi_device_handle_t *spi)
 
     mutex = xSemaphoreCreateMutex();
 
-    /* Init SPI driver. */
+    /* Init spi driver. */
     ili9431_spi_master_init(spi);
 
     /* Init non spi gpio. */
@@ -201,10 +202,10 @@ void ili9341_init(spi_device_handle_t *spi)
     ESP_LOGI(TAG, "Initialize the display.");
 
     /* Send all the commands. */
-    while (lcd_init_cmds[cmd].databytes != 0xff) { /* 0xff is the end marker. */
-        ili9341_command(*spi, lcd_init_cmds[cmd].cmd);
-        ili9341_data(*spi, lcd_init_cmds[cmd].data, lcd_init_cmds[cmd].databytes & 0x1F);
-        if (lcd_init_cmds[cmd].databytes & DELAY_BIT) {
+    while (ili_init_commands[cmd].bytes != 0xff) {
+        ili9341_command(*spi, ili_init_commands[cmd].cmd);
+        ili9341_data(*spi, ili_init_commands[cmd].data, ili_init_commands[cmd].bytes & 0x1F);
+        if (ili_init_commands[cmd].bytes & DELAY_BIT) {
             vTaskDelay(100 / portTICK_RATE_MS);
         }
         cmd++;
@@ -247,25 +248,29 @@ void ili9431_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w,
         trans[x].flags = SPI_TRANS_USE_TXDATA;
     }
 
-    trans[0].tx_data[0] = 0x2A;           //Column Address Set
-    trans[1].tx_data[0] = x1 >> 8;              //Start Col High
-    trans[1].tx_data[1] = x1 & 0xff;              //Start Col Low
-    trans[1].tx_data[2] = x2 >> 8;       //End Col High
-    trans[1].tx_data[3] = x2 &0xff;     //End Col Low
-    trans[2].tx_data[0] = 0x2B;           //Page address set
-    trans[3].tx_data[0] = y1 >> 8;        //Start page high
-    trans[3].tx_data[1] = y1 & 0xff;      //start page low
-    trans[3].tx_data[2] = y2 >> 8;    //end page high
-    trans[3].tx_data[3] = y2 & 0xff;  //end page low
-    trans[4].tx_data[0] = 0x2C;           //memory write
-    trans[5].tx_buffer = bitmap;        //finally send the line data
-    trans[5].length = size * 2 * 8; //320*2*8*PARALLEL_LINES;          //Data length, in bits
-    trans[5].flags = 0; //undo SPI_TRANS_USE_TXDATA flag
+    /* Column Address Set */
+    trans[0].tx_data[0] = ILI9341_CASET;
+    trans[1].tx_data[0] = x1 >> 8;
+    trans[1].tx_data[1] = x1 & 0xff;
+    trans[1].tx_data[2] = x2 >> 8;
+    trans[1].tx_data[3] = x2 & 0xff;
+    /* Page Address Set */
+    trans[2].tx_data[0] = ILI9341_PASET;
+    trans[3].tx_data[0] = y1 >> 8;
+    trans[3].tx_data[1] = y1 & 0xff;
+    trans[3].tx_data[2] = y2 >> 8;
+    trans[3].tx_data[3] = y2 & 0xff;
+    /* Memory Write */
+    trans[4].tx_data[0] = ILI9341_RAMWR;
+    trans[5].tx_buffer = bitmap;
+    /* Transfer size in bits */
+    trans[5].length = size * DISPLAY_DEPTH;
+    /* Clear SPI_TRANS_USE_TXDATA flag */
+    trans[5].flags = 0;
 
     for (x = 0; x <= 5; x++) {
         ESP_ERROR_CHECK(spi_device_queue_trans(spi, &trans[x], portMAX_DELAY));
     }
-
     /* Could do stuff here... */
     ili9341_wait(spi);
 
