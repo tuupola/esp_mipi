@@ -48,64 +48,30 @@ static const uint8_t DELAY_BIT = 1 << 7;
 
 static SemaphoreHandle_t mutex;
 
-DRAM_ATTR static const lcd_init_cmd_t ili_init_commands[]={
-    /* Power contorl B, power control = 0, DC_ENA = 1 */
-    {ILI9341_PWCTRB, {0x00, 0x83, 0X30}, 3},
-    /* Power on sequence control,
-     * cp1 keeps 1 frame, 1st frame enable
-     * vcl = 0, ddvdh=3, vgh=1, vgl=2
-     * DDVDH_ENH=1
-     */
-    {ILI9341_PWONCTR, {0x64, 0x03, 0X12, 0X81}, 4},
-    /* Driver timing control A,
-     * non-overlap=default +1
-     * EQ=default - 1, CR=default
-     * pre-charge=default - 1
-     */
-    {ILI9341_DRVTCTRA, {0x85, 0x01, 0x79}, 3},
-    /* Power control A, Vcore=1.6V, DDVDH=5.6V */
-    {ILI9341_PWCTRA, {0x39, 0x2C, 0x00, 0x34, 0x02}, 5},
-    /* Pump ratio control, DDVDH=2xVCl */
-    {ILI9341_PUMPRTC, {0x20}, 1},
-    /* Driver timing control, all=0 unit */
-    {ILI9341_TMCTRA, {0x00, 0x00}, 2},
-    /* Power control 1, GVDD=4.75V */
-    {ILI9341_PWCTR1, {0x26}, 1},
-    /* Power control 2, DDVDH=VCl*2, VGH=VCl*7, VGL=-VCl*3 */
-    {ILI9341_PWCTR2, {0x11}, 1},
-    /* VCOM control 1, VCOMH=4.025V, VCOML=-0.950V */
-    {ILI9341_VMCTR1, {0x35, 0x3E}, 2},
-    /* VCOM control 2, VCOMH=VMH-2, VCOML=VML-2 */
-    {ILI9341_VMCTR2, {0xBE}, 1},
-    /* Memory access control */
-    {ILI9341_MADCTL, {CONFIG_ILI9341_MADCTL}, 1},
-    /* Pixel format, 16bits/pixel for RGB/MCU interface */
-    {ILI9341_PIXFMT, {0x55}, 1}, // 0b01010101 ie. 16 bits per pixel
-    /* Frame rate control, f=fosc, 70Hz fps */
-    {ILI9341_FRMCTR1, {0x00, 0x1B}, 2},
-    /* Enable 3 gamma control, disabled */
-    {ILI9341_3GENABLE, {0x08}, 1},
-    /* Gamma set, curve 1 */
-    {ILI9341_GAMMASET, {0x01}, 1},
-    /* Positive gamma correction */
-    {ILI9341_GMCTRP1, {0x1F, 0x1A, 0x18, 0x0A, 0x0F, 0x06, 0x45, 0X87, 0x32, 0x0A, 0x07, 0x02, 0x07, 0x05, 0x00}, 15},
-    /* Negative gamma correction */
-    {ILI9341_GMCTRN1, {0x00, 0x25, 0x27, 0x05, 0x10, 0x09, 0x3A, 0x78, 0x4D, 0x05, 0x18, 0x0D, 0x38, 0x3A, 0x1F}, 15},
-    /* Column address set, SC=0, EC=0xEF */
-    {ILI9341_CASET, {0x00, 0x00, 0x00, 0xEF}, 4},
-    /* Page address set, SP=0, EP=0x013F */
-    {ILI9341_PASET, {0x00, 0x00, 0x01, 0x3f}, 4},
-    /* Memory write */
-    {ILI9341_RAMWR, {0}, 0},
-    /* Entry mode set, Low vol detect disabled, normal display */
-    {ILI9341_ENTRYMODE, {0x07}, 1},
-    /* Display function control */
-    {ILI9341_DFUNCTR, {0x0A, 0x82, 0x27, 0x00}, 4},
-    /* Sleep out bit */
-    {ILI9341_SLPOUT, {0}, 0 | DELAY_BIT},
-    /* Display on bit */
-    {ILI9341_DISPON, {0}, 0 | DELAY_BIT},
+DRAM_ATTR static const lcd_init_cmd_t st_init_commands[]={
+    {0x01, {0}, 0 | DELAY_BIT},
+    {0x11, {0}, 0 | DELAY_BIT},
 
+    {0xB1, {0x01, 0x2C, 0x2D}, 3}, // Frame Rate Control
+    {0xB2, {0x01, 0x2C, 0x2D}, 3}, // Frame Rate Control
+    {0xB3, {0x01, 0x2C, 0x2D, 0x01, 0x2C, 0x2D}, 6}, // Frame Rate Control
+    {0xB4, {0x07}, 1}, // Display Inversion Control
+    {0xC0, {0xA2, 0x02, 0x84}, 3}, // Power Control 1
+    {0xC1, {0xC5}, 1}, // Power Control 2
+    {0xC2, {0x0A, 0x00}, 2}, // Power Control 3
+    {0xC3, {0x8A, 0x2A}, 2}, // Power Control 4
+    {0xC4, {0x8A, 0xEE}, 2}, // Power Control 5
+    {0xC5, {0x0E}, 1}, // VCOM Control 1
+    {0x20, {0}, 0}, // Display Inversion Off
+    {0x36, {0xC0}, 1}, // Memory Data Access Control 0xC8
+    {0x3A, {0x05}, 1}, // Interface Pixel Format
+    {0x2A, {0x00, 0x02, 0x00, 0x81}, 4}, // Column Address Set
+    {0x2B, {0x00, 0x01, 0x00, 0xA0}, 4}, // Row Address Set
+    {0x21, {0}, 0}, // Display Inversion On
+    {0xE0, {0x02, 0x1C, 0x07, 0x12, 0x37, 0x32, 0x29, 0x2D, 0x29, 0x25, 0x2B, 0x39, 0x00, 0x01, 0x03, 0x10}, 16}, // Gamma (‘+’polarity) Correction Characteristics Setting
+    {0xE1, {0x03, 0x1D, 0x07, 0x06, 0x2E, 0x2C, 0x29, 0x2D, 0x2E, 0x2E, 0x37, 0x3F, 0x00, 0x00, 0x02, 0x10}, 16}, // Gamma ‘-’polarity Correction Characteristics Setting
+    {0x13, {0}, 0 | DELAY_BIT}, // Normal Display Mode On
+    {0x29, {0}, 0 | DELAY_BIT}, // Display On
     /* End of commands . */
     {0, {0}, 0xff},
 };
@@ -202,10 +168,10 @@ void ili9341_init(spi_device_handle_t *spi)
     ESP_LOGI(TAG, "Initialize the display.");
 
     /* Send all the commands. */
-    while (ili_init_commands[cmd].bytes != 0xff) {
-        ili9341_command(*spi, ili_init_commands[cmd].cmd);
-        ili9341_data(*spi, ili_init_commands[cmd].data, ili_init_commands[cmd].bytes & 0x1F);
-        if (ili_init_commands[cmd].bytes & DELAY_BIT) {
+    whilest[cmd].bytes != 0xff) {
+        ili9341_command(*spist[cmd].cmd);
+        ili9341_data(*spist[cmd].datast[cmd].bytes & 0x1F);
+        ifst[cmd].bytes & DELAY_BIT) {
             vTaskDelay(100 / portTICK_RATE_MS);
         }
         cmd++;
