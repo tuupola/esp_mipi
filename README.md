@@ -1,23 +1,24 @@
-# ESP ILI9341 Driver
+# ESP ST7735S Driver
 
-ESP ILI9341 display driver. Supports M5Stack out of the box. Everything is still work in progress. Things will change without warning. I'm doing this to learn C.
+Low level ESP ST7735S display driver. Supports M5Stick out of the box.
 
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 
 ## Usage
 
-First initialise the ILI9341 driver. SPI speed and pins can be changed with `$ make menuconfig`. Default settings will work with M5Stack. Other than that the driver provides only putpixel and blit functions. It is meant to be used with an external graphics library such as [copepod](https://github.com/tuupola/copepod).
+First initialise the ST7735S driver. SPI speed and pins can be changed with `$ make menuconfig`. Default settings will work with M5Stick. This drives is low lever. It provides only blit, putpixel and ioctl functions. It is meant to be used with an external graphics library such as [copepod](https://github.com/tuupola/copepod).
 
 ```c
 #include <driver/spi_master.h>
 
-#include "ili9341.h"
+#include "st7735s.h"
 
 spi_device_handle_t spi;
-ili9341_init(&spi);
+st7735s_init(&spi);
 
-ili9431_putpixel(spi, x0, y0, color);
-ili9431_blit(spi, x0, y0, w, h, &bitmap)
+st7735s_blit(spi, x0, y0, w, h, &bitmap);
+st7735s_putpixel(spi, x0, y0, color);
+st7735s_ioctl(spi, command, &data, size);
 ```
 
 ## License
