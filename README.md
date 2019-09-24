@@ -6,7 +6,7 @@ Low level ESP ST7735S display driver. Supports M5Stick out of the box.
 
 ## Usage
 
-First initialise the ST7735S driver. SPI speed and pins can be changed with `$ make menuconfig`. Default settings will work with M5Stick. This drives is low lever. It provides only blit, putpixel and ioctl functions. It is meant to be used with an external graphics library such as [copepod](https://github.com/tuupola/copepod).
+First initialise the ST7735S driver. SPI speed and pins can be changed with `$ make menuconfig`. Default settings will work with M5Stick. This drives is low lever. It provides only blit, putpixel and ioctl functions. It is meant to be used with an external graphics library such as [copepod](https://github.com/tuupola/copepod). For example usage see [M5Stick graphics example](https://github.com/tuupola/esp-examples/tree/master/015-m5stick-gfx).
 
 ```c
 #include <driver/spi_master.h>
