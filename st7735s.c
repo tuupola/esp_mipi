@@ -48,28 +48,18 @@ static const uint8_t DELAY_BIT = 1 << 7;
 
 static SemaphoreHandle_t mutex;
 
-DRAM_ATTR static const lcd_init_cmd_t st_init_commands[]={
+DRAM_ATTR static const lcd_init_cmd_t st_init_commands[] = {
+    /* Software Reset */
     {ST7735S_SWRESET, {0}, 0 | DELAY_BIT},
+    /* Sleep Out (default after reset is SLPIN) */
     {ST7735S_SLPOUT, {0}, 0 | DELAY_BIT},
-    {ST7735S_FRMCTR1, {0x01, 0x2C, 0x2D}, 3},
-    {ST7735S_FRMCTR2, {0x01, 0x2C, 0x2D}, 3},
-    {ST7735S_FRMCTR3, {0x01, 0x2C, 0x2D, 0x01, 0x2C, 0x2D}, 6},
-    {ST7735S_INVCTR, {0x07}, 1},
-    {ST7735S_PWCTR1, {0xA2, 0x02, 0x84}, 3},
-    {ST7735S_PWCTR2, {0xC5}, 1},
-    {ST7735S_PWCTR3, {0x0A, 0x00}, 2},
-    {ST7735S_PWCTR4, {0x8A, 0x2A}, 2},
-    {ST7735S_PWCTR5, {0x8A, 0xEE}, 2},
-    {ST7735S_VMCTR1, {0x0E}, 1},
-    {ST7735S_INVOFF, {0}, 0},
+    /* Memory Data Access Control (reset does not affect) */
     {ST7735S_MADCTL, {0xC0}, 1},
+    /* Interface Pixel Format (reset does not affect) */
     {ST7735S_COLMOD, {0x05}, 1},
-    {ST7735S_CASET, {0x00, 0x02, 0x00, 0x81}, 4},
-    {ST7735S_RASET, {0x00, 0x01, 0x00, 0xA0}, 4},
+    /* Display Inversion On (default after reset is INVOFF) */
     {ST7735S_INVON, {0}, 0},
-    {ST7735S_GMCTRP1, {0x02, 0x1C, 0x07, 0x12, 0x37, 0x32, 0x29, 0x2D, 0x29, 0x25, 0x2B, 0x39, 0x00, 0x01, 0x03, 0x10}, 16}, // Gamma (‘+’polarity) Correction Characteristics Setting
-    {ST7735S_GMCTRN1, {0x03, 0x1D, 0x07, 0x06, 0x2E, 0x2C, 0x29, 0x2D, 0x2E, 0x2E, 0x37, 0x3F, 0x00, 0x00, 0x02, 0x10}, 16}, // Gamma ‘-’polarity Correction Characteristics Setting
-    {ST7735S_NORON, {0}, 0 | DELAY_BIT},
+    /* Display On (default after reset is DISPOFF) */
     {ST7735S_DISPON, {0}, 0 | DELAY_BIT},
     /* End of commands . */
     {0, {0}, 0xff},
@@ -84,6 +74,7 @@ static void st7735s_command(spi_device_handle_t spi, const uint8_t command)
     transaction.length = 1 * 8; /* Command is 1 byte ie 8 bits. */
     transaction.tx_buffer = &command; /* The data is the cmd itself. */
     transaction.user = (void*)0; /* DC needs to be set to 0. */
+    ESP_LOGD(TAG, "Sending command 0x%02x", (uint8_t)command);
     ESP_ERROR_CHECK(spi_device_transmit(spi, &transaction));
 }
 
@@ -97,6 +88,7 @@ static void st7735s_data(spi_device_handle_t spi, const uint8_t *data, uint16_t 
     transaction.length = length * 8; /* Length in bits. */
     transaction.tx_buffer = data;
     transaction.user = (void*)1; /* DC needs to be set to 1. */
+    ESP_LOG_BUFFER_HEX_LEVEL(TAG, data, length, ESP_LOG_DEBUG);
     ESP_ERROR_CHECK(spi_device_transmit(spi, &transaction));
 }
 
@@ -150,12 +142,17 @@ void st7735s_init(spi_device_handle_t *spi)
 
     mutex = xSemaphoreCreateMutex();
 
-    /* Init spi driver. */
-    st7735s_spi_master_init(spi);
+	gpio_set_direction(CONFIG_ST7735S_PIN_CS, GPIO_MODE_OUTPUT);
+	gpio_set_level(CONFIG_ST7735S_PIN_CS, 0);
 
     /* Init non spi gpio. */
     gpio_set_direction(CONFIG_ST7735S_PIN_DC, GPIO_MODE_OUTPUT);
     gpio_set_direction(CONFIG_ST7735S_PIN_RST, GPIO_MODE_OUTPUT);
+
+    /* Init spi driver. */
+    st7735s_spi_master_init(spi);
+    vTaskDelay(100 / portTICK_RATE_MS);
+
 
     if (CONFIG_ST7735S_PIN_BCKL > 0) {
         gpio_set_direction(CONFIG_ST7735S_PIN_BCKL, GPIO_MODE_OUTPUT);
@@ -174,13 +171,14 @@ void st7735s_init(spi_device_handle_t *spi)
         st7735s_command(*spi, st_init_commands[cmd].cmd);
         st7735s_data(*spi, st_init_commands[cmd].data, st_init_commands[cmd].bytes & 0x1F);
         if (st_init_commands[cmd].bytes & DELAY_BIT) {
-            vTaskDelay(100 / portTICK_RATE_MS);
+            ESP_LOGD(TAG, "Delaying after command 0x%02x", (uint8_t)st_init_commands[cmd].cmd);
+            vTaskDelay(200 / portTICK_RATE_MS);
         }
         cmd++;
     }
 
     /* Enable backlight. */
-    gpio_set_level(CONFIG_ST7735S_PIN_BCKL, 1);
+    //gpio_set_level(CONFIG_ST7735S_PIN_BCKL, 1);
 }
 
 void st7735s_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint16_t *bitmap)
