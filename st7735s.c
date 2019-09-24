@@ -79,7 +79,7 @@ static void st7735s_command(spi_device_handle_t spi, const uint8_t command)
 }
 
 /* Uses spi_device_transmit, which waits until the transfer is complete. */
-static void st7735s_data(spi_device_handle_t spi, const uint8_t *data, uint16_t length)
+static void st7735s_data(spi_device_handle_t spi, const uint8_t *data, size_t length)
 {
     spi_transaction_t transaction;
 
@@ -249,4 +249,12 @@ void st7735s_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w,
 void st7735s_putpixel(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t colour)
 {
     st7735s_blit(spi, x1, y1, 1, 1, &colour);
+}
+
+void st7735s_ioctl(spi_device_handle_t spi, uint8_t command, uint8_t *data, size_t size)
+{
+    xSemaphoreTake(mutex, portMAX_DELAY);
+    st7735s_command(spi, command);
+    st7735s_data(spi, data, size);
+    xSemaphoreGive(mutex);
 }

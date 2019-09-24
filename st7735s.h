@@ -46,6 +46,7 @@ typedef struct {
 void st7735s_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint16_t *bitmap);
 void st7735s_putpixel(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t colour);
 void st7735s_init(spi_device_handle_t *spi);
+void st7735s_ioctl(spi_device_handle_t spi, uint8_t command, uint8_t *data, size_t size);
 
 #define ST7735S_NOP         0x00
 #define ST7735S_SWRESET     0x01 /* Software Reset */
