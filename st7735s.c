@@ -5,7 +5,7 @@ released to Public Domain: https://goo.gl/ksC2Ln
 
 
 Copyright (c) 2017-2018 Espressif Systems (Shanghai) PTE LTD
-Copyright (c) 2018 Mika Tuupola
+Copyright (c) 2019 Mika Tuupola
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
