@@ -71,8 +71,8 @@ DRAM_ATTR static const lcd_init_cmd_t st_init_commands[] = {
 static void st7735s_command(spi_device_handle_t spi, const uint8_t command)
 {
     spi_transaction_t transaction;
-
     memset(&transaction, 0, sizeof(transaction));
+
     /* Command is 1 byte ie 8 bits */
     transaction.length = 1 * 8;
     /* The data is the cmd itself */
@@ -164,9 +164,7 @@ void st7735s_init(spi_device_handle_t *spi)
     st7735s_spi_master_init(spi);
     vTaskDelay(100 / portTICK_RATE_MS);
 
-    if (CONFIG_ST7735S_PIN_BCKL > 0) {
-        gpio_set_direction(CONFIG_ST7735S_PIN_BCKL, GPIO_MODE_OUTPUT);
-    }
+
 
     /* Reset the display. */
     gpio_set_level(CONFIG_ST7735S_PIN_RST, 0);
@@ -188,7 +186,10 @@ void st7735s_init(spi_device_handle_t *spi)
     }
 
     /* Enable backlight */
-    //gpio_set_level(CONFIG_ST7735S_PIN_BCKL, 1);
+    if (CONFIG_ST7735S_PIN_BCKL > 0) {
+        gpio_set_direction(CONFIG_ST7735S_PIN_BCKL, GPIO_MODE_OUTPUT);
+        gpio_set_level(CONFIG_ST7735S_PIN_BCKL, 1);
+    }
 }
 
 void st7735s_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint16_t *bitmap)
