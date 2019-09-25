@@ -1,8 +1,9 @@
 /*
-
 This code is based on Espressif provided SPI Master example which was
 released to Public Domain: https://goo.gl/ksC2Ln
+*/
 
+/*
 
 Copyright (c) 2017-2018 Espressif Systems (Shanghai) PTE LTD
 Copyright (c) 2019 Mika Tuupola
@@ -26,6 +27,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 */
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -71,9 +73,12 @@ static void st7735s_command(spi_device_handle_t spi, const uint8_t command)
     spi_transaction_t transaction;
 
     memset(&transaction, 0, sizeof(transaction));
-    transaction.length = 1 * 8; /* Command is 1 byte ie 8 bits. */
-    transaction.tx_buffer = &command; /* The data is the cmd itself. */
-    transaction.user = (void*)0; /* DC needs to be set to 0. */
+    /* Command is 1 byte ie 8 bits */
+    transaction.length = 1 * 8;
+    /* The data is the cmd itself */
+    transaction.tx_buffer = &command;
+    /* DC needs to be set to 0. */
+    transaction.user = (void *) 0;
     ESP_LOGD(TAG, "Sending command 0x%02x", (uint8_t)command);
     ESP_ERROR_CHECK(spi_device_transmit(spi, &transaction));
 }
@@ -81,13 +86,19 @@ static void st7735s_command(spi_device_handle_t spi, const uint8_t command)
 /* Uses spi_device_transmit, which waits until the transfer is complete. */
 static void st7735s_data(spi_device_handle_t spi, const uint8_t *data, size_t length)
 {
-    spi_transaction_t transaction;
+    if (0 == length) {
+        return;
+    };
 
-    if (0 == length) { return; };
+    spi_transaction_t transaction;
     memset(&transaction, 0, sizeof(transaction));
-    transaction.length = length * 8; /* Length in bits. */
+
+     /* Length in bits */
+    transaction.length = length * 8;
     transaction.tx_buffer = data;
-    transaction.user = (void*)1; /* DC needs to be set to 1. */
+     /* DC needs to be set to 1 */
+    transaction.user = (void *) 1;
+
     ESP_LOG_BUFFER_HEX_LEVEL(TAG, data, length, ESP_LOG_DEBUG);
     ESP_ERROR_CHECK(spi_device_transmit(spi, &transaction));
 }
@@ -97,17 +108,17 @@ static void st7735s_data(spi_device_handle_t spi, const uint8_t *data, size_t le
 /* It will set the DC line to the value indicated in the user field. */
 static void st7735s_pre_callback(spi_transaction_t *transaction)
 {
-    int dc=(int)transaction->user;
+    uint32_t dc = (uint32_t) transaction->user;
     gpio_set_level(CONFIG_ST7735S_PIN_DC, dc);
 }
 
 static void st7735s_wait(spi_device_handle_t spi)
 {
-    spi_transaction_t *rtrans;
+    spi_transaction_t *trans;
 
     /* TODO: This should be all transactions. */
     for (uint8_t i = 0; i <= 5; i++) {
-        ESP_ERROR_CHECK(spi_device_get_trans_result(spi, &rtrans, portMAX_DELAY));
+        ESP_ERROR_CHECK(spi_device_get_trans_result(spi, &trans, portMAX_DELAY));
         /* Do something with the result. */
     }
 }
@@ -153,7 +164,6 @@ void st7735s_init(spi_device_handle_t *spi)
     st7735s_spi_master_init(spi);
     vTaskDelay(100 / portTICK_RATE_MS);
 
-
     if (CONFIG_ST7735S_PIN_BCKL > 0) {
         gpio_set_direction(CONFIG_ST7735S_PIN_BCKL, GPIO_MODE_OUTPUT);
     }
@@ -164,7 +174,7 @@ void st7735s_init(spi_device_handle_t *spi)
     gpio_set_level(CONFIG_ST7735S_PIN_RST, 1);
     vTaskDelay(100 / portTICK_RATE_MS);
 
-    ESP_LOGI(TAG, "Initialize the display.");
+    ESP_LOGI(TAG, "Initialize the display");
 
     /* Send all the commands. */
     while (st_init_commands[cmd].bytes != 0xff) {
@@ -177,7 +187,7 @@ void st7735s_init(spi_device_handle_t *spi)
         cmd++;
     }
 
-    /* Enable backlight. */
+    /* Enable backlight */
     //gpio_set_level(CONFIG_ST7735S_PIN_BCKL, 1);
 }
 
@@ -205,14 +215,14 @@ void st7735s_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w,
     /* to re-init them each call. */
     for (x = 0; x < 6; x++) {
         memset(&trans[x], 0, sizeof(spi_transaction_t));
-        if (0 == (x&1)) {
+        if (0 == (x & 1)) {
             /* Even transfers are commands. */
             trans[x].length = 8;
             trans[x].user = (void*)0;
         } else {
             /* Odd transfers are data. */
             trans[x].length = 8 * 4;
-            trans[x].user = (void*)1;
+            trans[x].user = (void *) 1;
         }
         trans[x].flags = SPI_TRANS_USE_TXDATA;
     }
