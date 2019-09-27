@@ -84,7 +84,7 @@ static void st7735s_command(spi_device_handle_t spi, const uint8_t command)
 }
 
 /* Uses spi_device_transmit, which waits until the transfer is complete. */
-static void st7735s_data(spi_device_handle_t spi, const uint8_t *data, size_t length)
+static void st7735s_write_data(spi_device_handle_t spi, const uint8_t *data, size_t length)
 {
     if (0 == length) {
         return;
@@ -101,6 +101,29 @@ static void st7735s_data(spi_device_handle_t spi, const uint8_t *data, size_t le
 
     ESP_LOG_BUFFER_HEX_LEVEL(TAG, data, length, ESP_LOG_DEBUG);
     ESP_ERROR_CHECK(spi_device_transmit(spi, &transaction));
+}
+
+static void st7735s_read_data(spi_device_handle_t spi, uint8_t *data, size_t length)
+{
+    if (0 == length) {
+        return;
+    };
+
+    spi_transaction_t transaction;
+    memset(&transaction, 0, sizeof(transaction));
+
+     /* Length in bits */
+    transaction.length = length * 8;
+    transaction.rxlength = length * 8;
+    transaction.rx_buffer = data;
+    //transaction.flags = SPI_TRANS_USE_RXDATA;
+     /* DC needs to be set to 1 */
+    transaction.user = (void *) 1;
+
+
+    ESP_LOG_BUFFER_HEX_LEVEL(TAG, data, length, ESP_LOG_WARN);
+    ESP_ERROR_CHECK(spi_device_polling_transmit(spi, &transaction));
+    ESP_LOG_BUFFER_HEX_LEVEL(TAG, data, length, ESP_LOG_INFO);
 }
 
 
@@ -164,26 +187,25 @@ void st7735s_init(spi_device_handle_t *spi)
     st7735s_spi_master_init(spi);
     vTaskDelay(100 / portTICK_RATE_MS);
 
-
-
     /* Reset the display. */
     gpio_set_level(CONFIG_ST7735S_PIN_RST, 0);
     vTaskDelay(100 / portTICK_RATE_MS);
     gpio_set_level(CONFIG_ST7735S_PIN_RST, 1);
     vTaskDelay(100 / portTICK_RATE_MS);
 
-    ESP_LOGI(TAG, "Initialize the display");
 
     /* Send all the commands. */
     while (st_init_commands[cmd].bytes != 0xff) {
         st7735s_command(*spi, st_init_commands[cmd].cmd);
-        st7735s_data(*spi, st_init_commands[cmd].data, st_init_commands[cmd].bytes & 0x1F);
+        st7735s_write_data(*spi, st_init_commands[cmd].data, st_init_commands[cmd].bytes & 0x1F);
         if (st_init_commands[cmd].bytes & DELAY_BIT) {
             ESP_LOGD(TAG, "Delaying after command 0x%02x", (uint8_t)st_init_commands[cmd].cmd);
             vTaskDelay(200 / portTICK_RATE_MS);
         }
         cmd++;
     }
+
+    ESP_LOGI(TAG, "Display initialized.");
 
     /* Enable backlight */
     if (CONFIG_ST7735S_PIN_BCKL > 0) {
@@ -262,10 +284,30 @@ void st7735s_putpixel(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_
     st7735s_blit(spi, x1, y1, 1, 1, &colour);
 }
 
-void st7735s_ioctl(spi_device_handle_t spi, uint8_t command, uint8_t *data, size_t size)
+void st7735s_ioctl(spi_device_handle_t spi, const uint8_t command, uint8_t *data, size_t size)
 {
     xSemaphoreTake(mutex, portMAX_DELAY);
-    st7735s_command(spi, command);
-    st7735s_data(spi, data, size);
+
+    switch (command) {
+        case ST7735S_RDDID:
+        case ST7735S_RDDST:
+        case ST7735S_RDDPM:
+        case ST7735S_RDDMADCTL:
+        case ST7735S_RDDCOLMOD:
+        case ST7735S_RDDIM:
+        case ST7735S_RDDSM:
+        case ST7735S_RDDSDR:
+        case ST7735S_RAMRD:
+        case ST7735S_RDID1:
+        case ST7735S_RDID2:
+        case ST7735S_RDID3:
+            st7735s_command(spi, command);
+            st7735s_read_data(spi, data, size);
+            break;
+        default:
+            st7735s_command(spi, command);
+            st7735s_write_data(spi, data, size);
+    }
+
     xSemaphoreGive(mutex);
 }
