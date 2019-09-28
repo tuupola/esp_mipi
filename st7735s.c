@@ -56,7 +56,7 @@ DRAM_ATTR static const lcd_init_cmd_t st_init_commands[] = {
     /* Sleep Out (default after reset is SLPIN) */
     {ST7735S_SLPOUT, {0}, 0 | DELAY_BIT},
     /* Memory Data Access Control (reset does not affect) */
-    {ST7735S_MADCTL, {ST7735S_MADCTL_MY | ST7735S_MADCTL_MX}, 1},
+    {ST7735S_MADCTL, {CONFIG_ST7735S_MADCTL}, 1},
     /* Interface Pixel Format (reset does not affect) */
     {ST7735S_COLMOD, {0x05}, 1},
     /* Display Inversion On (default after reset is INVOFF) */
@@ -66,6 +66,8 @@ DRAM_ATTR static const lcd_init_cmd_t st_init_commands[] = {
     /* End of commands . */
     {0, {0}, 0xff},
 };
+
+uint8_t foo = ST7735S_MADCTL_MY | ST7735S_MADCTL_MX | ST7735S_MADCTL_BGR;
 
 /* Uses spi_device_transmit, which waits until the transfer is complete. */
 static void st7735s_command(spi_device_handle_t spi, const uint8_t command)

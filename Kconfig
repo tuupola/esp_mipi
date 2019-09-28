@@ -9,7 +9,7 @@ config SPI_CLOCK_SPEED_HZ
 
 config ST7735S_MADCTL
     hex "Display orientation"
-    default 0xC0
+    default 0xC8
     help
         See memory access control in the datasheet. Defaults are ok for M5Stick.
 
