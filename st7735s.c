@@ -56,7 +56,7 @@ DRAM_ATTR static const lcd_init_cmd_t st_init_commands[] = {
     /* Sleep Out (default after reset is SLPIN) */
     {ST7735S_SLPOUT, {0}, 0 | DELAY_BIT},
     /* Memory Data Access Control (reset does not affect) */
-    {ST7735S_MADCTL, {0xC0}, 1},
+    {ST7735S_MADCTL, {ST7735S_MADCTL_MY | ST7735S_MADCTL_MX}, 1},
     /* Interface Pixel Format (reset does not affect) */
     {ST7735S_COLMOD, {0x05}, 1},
     /* Display Inversion On (default after reset is INVOFF) */
