@@ -106,10 +106,10 @@ void st7735s_ioctl(spi_device_handle_t spi, uint8_t command, uint8_t *data, size
 
 /* Values */
 
-#define ST7735S_MADCTL_MY  0x80 /* Row address order */
-#define ST7735S_MADCTL_MX  0x40 /* Column address order */
-#define ST7735S_MADCTL_MV  0x20 /* Row / column exchange */
-#define ST7735S_MADCTL_ML  0x10 /* Vertical refresh order */
+#define ST7735S_MADCTL_MY  0x80 /* Row address order (Mirror Y-axis) */
+#define ST7735S_MADCTL_MX  0x40 /* Column address order (Mirror X-axis) */
+#define ST7735S_MADCTL_MV  0x20 /* Row / column exchange (X-Y Exchange) */
+#define ST7735S_MADCTL_ML  0x10 /* Vertical refresh order (Scan direction) */
 #define ST7735S_MADCTL_RGB 0x00 /* RGB */
 #define ST7735S_MADCTL_BGR 0x08 /* BGR */
 #define ST7735S_MADCTL_MH  0x04 /* Horizontal refresh order */
