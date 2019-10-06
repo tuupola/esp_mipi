@@ -33,6 +33,9 @@ config MIPI_DISPLAY_OFFSET_Y
     help
         Adjust when using small display and image is not centered.
 
+config MIPI_DISPLAY_INVERT
+    bool "Invert colors"
+
 config MIPI_DISPLAY_PIN_MISO
     int "MISO pin number"
     default -1
