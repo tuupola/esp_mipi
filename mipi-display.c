@@ -52,20 +52,15 @@ static const uint8_t DELAY_BIT = 1 << 7;
 static SemaphoreHandle_t mutex;
 
 DRAM_ATTR static const lcd_init_cmd_t st_init_commands[] = {
-    /* Software Reset */
     {MIPI_DCS_SOFT_RESET, {0}, 0 | DELAY_BIT},
-    /* Memory Data Access Control (reset does not affect) */
     {MIPI_DCS_SET_ADDRESS_MODE, {CONFIG_MIPI_DISPLAY_GET_ADDRESS_MODE}, 1},
-    /* Interface Pixel Format (reset does not affect) */
     {MIPI_DCS_SET_PIXEL_FORMAT, {0x55}, 1},
 #ifdef CONFIG_MIPI_DISPLAY_INVERT
     {MIPI_DCS_ENTER_INVERT_MODE, {0}, 0},
 #else
     {MIPI_DCS_EXIT_INVERT_MODE, {0}, 0},
 #endif
-    /* Sleep Out (default after reset is SLPIN) */
     {MIPI_DCS_EXIT_SLEEP_MODE, {0}, 0 | DELAY_BIT},
-    /* Display On (default after reset is DISPOFF) */
     {MIPI_DCS_SET_DISPLAY_ON, {0}, 0 | DELAY_BIT},
     /* End of commands . */
     {0, {0}, 0xff},
