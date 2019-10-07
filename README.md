@@ -1,12 +1,12 @@
 # MIPI DCS Display Driver
 
-Low level driver for displays supporting the [MIPI Display Commant Set](https://www.mipi.org/specifications/display-command-set). Currently tested with ST7735S and ILI9341.
+Low level driver for displays supporting the [MIPI Display Command Set](https://www.mipi.org/specifications/display-command-set). Currently tested with ST7735S and ILI9341.
 
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 
 ## Usage
 
-Display size and orientation, SPI speed and all the pins can be changed with `menuconfig`. Defaults will work with an M5Stack.
+Display and SPI parameters all the pins can be changed with `menuconfig`. Defaults are ok for M5Stack.
 
 ```
 $ make menuconfig
