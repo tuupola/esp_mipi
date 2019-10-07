@@ -11,8 +11,6 @@ menu "Display orientation"
         bool "Flip X"
     config MIPI_DCS_ADDRESS_MODE_FLIP_Y_SELECTED
         bool "Flip Y"
-    config MIPI_DCS_ADDRESS_MODE_BGR_SELECTED
-        bool "BGR"
 endmenu
 
 config MIPI_DCS_ADDRESS_MODE_MIRROR_Y
@@ -39,11 +37,6 @@ config MIPI_DCS_ADDRESS_MODE_FLIP_Y
     hex
     default 0x00 if !MIPI_DCS_ADDRESS_MODE_FLIP_Y_SELECTED
     default 0x01 if MIPI_DCS_ADDRESS_MODE_FLIP_Y_SELECTED
-
-config MIPI_DCS_ADDRESS_MODE_BGR
-    hex
-    default 0x00 if !MIPI_DCS_ADDRESS_MODE_BGR_SELECTED
-    default 0x08 if MIPI_DCS_ADDRESS_MODE_BGR_SELECTED
 
 choice MIPI_PIXEL_FORMAT
     prompt "Pixel format"
@@ -93,6 +86,14 @@ config MIPI_DISPLAY_OFFSET_Y
 
 config MIPI_DISPLAY_INVERT
     bool "Invert colors"
+
+config MIPI_DCS_ADDRESS_MODE_BGR_SELECTED
+    bool "BGR"
+
+config MIPI_DCS_ADDRESS_MODE_BGR
+    hex
+    default 0x00 if !MIPI_DCS_ADDRESS_MODE_BGR_SELECTED
+    default 0x08 if MIPI_DCS_ADDRESS_MODE_BGR_SELECTED
 
 config SPI_CLOCK_SPEED_HZ
     int "SPI clock speed in Hz"
