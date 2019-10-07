@@ -1,6 +1,6 @@
-# ESP ST7735S Driver
+# MIPI DCS Display Driver
 
-Low level ESP ST7735S display driver. Supports M5Stick out of the box.
+Low level driver for displays supporting the [MIPI Display Commant Set](https://www.mipi.org/specifications/display-command-set). Currently tested with ST7735S and ILI9341.
 
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 
@@ -18,17 +18,17 @@ Note that this is a low level driver. It provides only putpixel, blit and ioctl 
 #include <driver/spi_master.h>
 #include <stdlib.h>
 
-#include "st7735s.h"
+#include "mipi-display.h"
 
 spi_device_handle_t spi;
-st7735s_init(&spi);
+mipi_display_init(&spi);
 
 /* Draw a random pixel on the screen. */
 uint16_t color = rand() % 0xffff;
 int16_t x0 = rand() % DISPLAY_WIDTH;
 int16_t y0 = rand() % DISPLAY_HEIGHT;
 
-st7735s_putpixel(spi, x0, y0, color);
+mipi_display_putpixel(spi, x0, y0, color);
 
 /* Draw a random rectangle on the screen. */
 uint16_t w = rand() % 32;
@@ -36,16 +36,28 @@ uint16_t h = rand() % 32;
 uint8_t bitmap[32 * 32 * DISPLAY_DEPTH];
 wmemset(bitmap, color, 32 * 32 * DISPLAY_DEPTH);
 
-st7735s_blit(spi, x0, y0, w, h, bitmap)
-
-/* Turn display inversion on. */
-st7735s_ioctl(spi, ST7735S_INVON, 0, 0);
-
-/* Read display MADCTL setting. */
-uint8_t buffer[2];
-st7735s_ioctl(spi, ST7735S_RDDMADCTL, buffer, 2);
+mipi_display_blit(spi, x0, y0, w, h, bitmap)
 ```
 
+You can also issue any command defined in [mipi-dcs.h](mipi-dcs.h).
+
+```c
+#include <driver/spi_master.h>
+#include <stdlib.h>
+
+#include "mipi-dcs.h"
+#include "mipi-display.h"
+
+spi_device_handle_t spi;
+mipi_display_init(&spi);
+
+/* Turn display inversion on. */
+mipi_display_ioctl(spi, MIPI_DCS_ENTER_INVERT_MODE, 0, 0);
+
+/* Read display ADDRESS_MODE setting. */
+uint8_t buffer[2];
+mipi_display_ioctl(spi, MIPI_DCS_GET_ADDRESS_MODE, buffer, 2);
+```
 
 ## License
 
