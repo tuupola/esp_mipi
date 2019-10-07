@@ -57,12 +57,12 @@
 #define MIPI_DCS_READ_DDB_START             0xA1
 #define MIPI_DCS_READ_DDB_CONTINUE          0xA8
 
-#define MIPI_DCS_PIXEL_FMT_24BIT            0x77 /* 0b01110111 */
-#define MIPI_DCS_PIXEL_FMT_18BIT            0x66 /* 0b01100110 */
-#define MIPI_DCS_PIXEL_FMT_16BIT            0x55 /* 0b01010101 */
-#define MIPI_DCS_PIXEL_FMT_12BIT            0x33 /* 0b00110011 */
-#define MIPI_DCS_PIXEL_FMT_8BIT             0x22 /* 0b00100010 */
-#define MIPI_DCS_PIXEL_FMT_3BIT             0x11 /* 0b00010001 */
+#define MIPI_DCS_PIXEL_FORMAT_24BIT         0x77 /* 0b01110111 */
+#define MIPI_DCS_PIXEL_FORMAT_18BIT         0x66 /* 0b01100110 */
+#define MIPI_DCS_PIXEL_FORMAT_16BIT         0x55 /* 0b01010101 */
+#define MIPI_DCS_PIXEL_FORMAT_12BIT         0x33 /* 0b00110011 */
+#define MIPI_DCS_PIXEL_FORMAT_8BIT          0x22 /* 0b00100010 */
+#define MIPI_DCS_PIXEL_FORMAT_3BIT          0x11 /* 0b00010001 */
 
 #define MIPI_DCS_ADDRESS_MODE_MIRROR_Y      0x80
 #define MIPI_DCS_ADDRESS_MODE_MIRROR_X      0x40
