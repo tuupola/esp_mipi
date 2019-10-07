@@ -18,7 +18,7 @@ Note that this is a low level driver. It provides only putpixel, blit and ioctl 
 #include <driver/spi_master.h>
 #include <stdlib.h>
 
-#include "mipi-display.h"
+#include "mipi_display.h"
 
 spi_device_handle_t spi;
 mipi_display_init(&spi);
@@ -39,14 +39,14 @@ wmemset(bitmap, color, 32 * 32 * DISPLAY_DEPTH);
 mipi_display_blit(spi, x0, y0, w, h, bitmap)
 ```
 
-You can also issue any command defined in [mipi-dcs.h](mipi-dcs.h).
+You can also issue any command defined in [mipi_dcs.h](mipi_dcs.h).
 
 ```c
 #include <driver/spi_master.h>
 #include <stdlib.h>
 
-#include "mipi-dcs.h"
-#include "mipi-display.h"
+#include "mipi_dcs.h"
+#include "mipi_display.h"
 
 spi_device_handle_t spi;
 mipi_display_init(&spi);

@@ -1,9 +1,4 @@
 /*
-This code is based on Espressif provided SPI Master example which was
-released to Public Domain: https://goo.gl/ksC2Ln
-*/
-
-/*
 
 Copyright (c) 2017-2018 Espressif Systems (Shanghai) PTE LTD
 Copyright (c) 2019 Mika Tuupola
@@ -28,6 +23,12 @@ SOFTWARE.
 
 */
 
+/*
+
+This code is based on Espressif provided SPI Master example which was
+released to Public Domain: https://goo.gl/ksC2Ln
+
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,10 +44,10 @@ SOFTWARE.
 #include <esp_log.h>
 
 #include "sdkconfig.h"
-#include "mipi-dcs.h"
-#include "mipi-display.h"
+#include "mipi_dcs.h"
+#include "mipi_display.h"
 
-static const char *TAG = "mipi-display";
+static const char *TAG = "mipi_display";
 static const uint8_t DELAY_BIT = 1 << 7;
 
 static SemaphoreHandle_t mutex;
