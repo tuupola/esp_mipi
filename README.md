@@ -28,7 +28,7 @@ uint16_t color = rand() % 0xffff;
 int16_t x0 = rand() % DISPLAY_WIDTH;
 int16_t y0 = rand() % DISPLAY_HEIGHT;
 
-mipi_display_putpixel(spi, x0, y0, color);
+mipi_display_put_pixel(spi, x0, y0, color);
 
 /* Draw a random rectangle on the screen. */
 uint16_t w = rand() % 32;
