@@ -80,7 +80,7 @@ static void mipi_display_command(spi_device_handle_t spi, const uint8_t command)
     /* DC needs to be set to 0. */
     transaction.user = (void *) 0;
     ESP_LOGD(TAG, "Sending command 0x%02x", (uint8_t)command);
-    ESP_ERROR_CHECK(spi_device_transmit(spi, &transaction));
+    ESP_ERROR_CHECK(spi_device_polling_transmit(spi, &transaction));
 }
 
 /* Uses spi_device_transmit, which waits until the transfer is complete. */
@@ -100,7 +100,7 @@ static void mipi_display_write_data(spi_device_handle_t spi, const uint8_t *data
     transaction.user = (void *) 1;
 
     ESP_LOG_BUFFER_HEX_LEVEL(TAG, data, length, ESP_LOG_DEBUG);
-    ESP_ERROR_CHECK(spi_device_transmit(spi, &transaction));
+    ESP_ERROR_CHECK(spi_device_polling_transmit(spi, &transaction));
 }
 
 static void mipi_display_read_data(spi_device_handle_t spi, uint8_t *data, size_t length)
@@ -133,17 +133,6 @@ static void mipi_display_pre_callback(spi_transaction_t *transaction)
 {
     uint32_t dc = (uint32_t) transaction->user;
     gpio_set_level(CONFIG_MIPI_DISPLAY_PIN_DC, dc);
-}
-
-static void mipi_display_wait(spi_device_handle_t spi)
-{
-    spi_transaction_t *trans;
-
-    /* TODO: This should be all transactions. */
-    for (uint8_t i = 0; i <= 5; i++) {
-        ESP_ERROR_CHECK(spi_device_get_trans_result(spi, &trans, portMAX_DELAY));
-        /* Do something with the result. */
-    }
 }
 
 static void mipi_display_spi_master_init(spi_device_handle_t *spi)
@@ -212,6 +201,9 @@ void mipi_display_init(spi_device_handle_t *spi)
         gpio_set_direction(CONFIG_MIPI_DISPLAY_PIN_BL, GPIO_MODE_OUTPUT);
         gpio_set_level(CONFIG_MIPI_DISPLAY_PIN_BL, 1);
     }
+
+    spi_device_acquire_bus(*spi, portMAX_DELAY);
+
 }
 
 void mipi_display_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint16_t *bitmap)
@@ -271,10 +263,8 @@ void mipi_display_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16
     trans[5].flags = 0;
 
     for (x = 0; x <= 5; x++) {
-        ESP_ERROR_CHECK(spi_device_queue_trans(spi, &trans[x], portMAX_DELAY));
+        ESP_ERROR_CHECK(spi_device_polling_transmit(spi, &trans[x]));
     }
-    /* Could do stuff here... */
-    mipi_display_wait(spi);
 
     xSemaphoreGive(mutex);
 }
@@ -316,4 +306,9 @@ void mipi_display_ioctl(spi_device_handle_t spi, const uint8_t command, uint8_t 
     }
 
     xSemaphoreGive(mutex);
+}
+
+void mipi_display_close(spi_device_handle_t spi)
+{
+    spi_device_release_bus(spi);
 }
