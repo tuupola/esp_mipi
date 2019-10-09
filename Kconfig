@@ -98,8 +98,8 @@ config MIPI_DCS_ADDRESS_MODE_BGR
 
 config SPI_CLOCK_SPEED_HZ
     int "SPI clock speed in Hz"
-    default 48000000
-    range 0 60000000
+    default 40000000
+    range 0 80000000
     help
         SPI clock speed in Hz. If you have problems try a lower value.
 
