@@ -80,7 +80,7 @@ static void mipi_display_command(spi_device_handle_t spi, const uint8_t command)
     /* DC needs to be set to 0. */
     transaction.user = (void *) 0;
     ESP_LOGD(TAG, "Sending command 0x%02x", (uint8_t)command);
-    ESP_ERROR_CHECK(spi_device_transmit(spi, &transaction));
+    ESP_ERROR_CHECK(spi_device_polling_transmit(spi, &transaction));
 }
 
 /* Uses spi_device_transmit, which waits until the transfer is complete. */
@@ -100,7 +100,7 @@ static void mipi_display_write_data(spi_device_handle_t spi, const uint8_t *data
     transaction.user = (void *) 1;
 
     ESP_LOG_BUFFER_HEX_LEVEL(TAG, data, length, ESP_LOG_DEBUG);
-    ESP_ERROR_CHECK(spi_device_transmit(spi, &transaction));
+    ESP_ERROR_CHECK(spi_device_polling_transmit(spi, &transaction));
 }
 
 static void mipi_display_read_data(spi_device_handle_t spi, uint8_t *data, size_t length)
@@ -133,17 +133,6 @@ static void mipi_display_pre_callback(spi_transaction_t *transaction)
 {
     uint32_t dc = (uint32_t) transaction->user;
     gpio_set_level(CONFIG_MIPI_DISPLAY_PIN_DC, dc);
-}
-
-static void mipi_display_wait(spi_device_handle_t spi)
-{
-    spi_transaction_t *trans;
-
-    /* TODO: This should be all transactions. */
-    for (uint8_t i = 0; i <= 5; i++) {
-        ESP_ERROR_CHECK(spi_device_get_trans_result(spi, &trans, portMAX_DELAY));
-        /* Do something with the result. */
-    }
 }
 
 static void mipi_display_spi_master_init(spi_device_handle_t *spi)
@@ -212,6 +201,9 @@ void mipi_display_init(spi_device_handle_t *spi)
         gpio_set_direction(CONFIG_MIPI_DISPLAY_PIN_BL, GPIO_MODE_OUTPUT);
         gpio_set_level(CONFIG_MIPI_DISPLAY_PIN_BL, 1);
     }
+
+    spi_device_acquire_bus(*spi, portMAX_DELAY);
+
 }
 
 void mipi_display_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint16_t *bitmap)
@@ -220,61 +212,61 @@ void mipi_display_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16
         return;
     }
 
-    int x;
-
     x1 = x1 + CONFIG_MIPI_DISPLAY_OFFSET_X;
     y1 = y1 + CONFIG_MIPI_DISPLAY_OFFSET_Y;
 
     int32_t x2 = x1 + w - 1;
     int32_t y2 = y1 + h - 1;
-
-    static spi_transaction_t trans[6];
     uint32_t size = w * h;
+
+    spi_transaction_t command;
+    spi_transaction_t data;
 
     xSemaphoreTake(mutex, portMAX_DELAY);
 
-    /* In theory, it's better to initialize trans and data only once and hang */
-    /* on to the initialized variables. We allocate them on the stack, so we need */
-    /* to re-init them each call. */
-    for (x = 0; x < 6; x++) {
-        memset(&trans[x], 0, sizeof(spi_transaction_t));
-        if (0 == (x & 1)) {
-            /* Even transfers are commands. */
-            trans[x].length = 8;
-            trans[x].user = (void*)0;
-        } else {
-            /* Odd transfers are data. */
-            trans[x].length = 8 * 4;
-            trans[x].user = (void *) 1;
-        }
-        trans[x].flags = SPI_TRANS_USE_TXDATA;
-    }
+    memset(&command, 0, sizeof(spi_transaction_t));
+    command.length = 8;
+    command.user = (void *) 0;
+    command.flags = SPI_TRANS_USE_TXDATA;
 
-    /* Column Address Set */
-    trans[0].tx_data[0] = MIPI_DCS_SET_COLUMN_ADDRESS;
-    trans[1].tx_data[0] = x1 >> 8;
-    trans[1].tx_data[1] = x1 & 0xff;
-    trans[1].tx_data[2] = x2 >> 8;
-    trans[1].tx_data[3] = x2 & 0xff;
-    /* Page Address Set */
-    trans[2].tx_data[0] = MIPI_DCS_SET_PAGE_ADDRESS;
-    trans[3].tx_data[0] = y1 >> 8;
-    trans[3].tx_data[1] = y1 & 0xff;
-    trans[3].tx_data[2] = y2 >> 8;
-    trans[3].tx_data[3] = y2 & 0xff;
-    /* Memory Write */
-    trans[4].tx_data[0] = MIPI_DCS_WRITE_MEMORY_START;
-    trans[5].tx_buffer = bitmap;
+    memset(&data, 0, sizeof(spi_transaction_t));
+    data.length = 8 * 4;
+    data.user = (void *) 1;
+    data.flags = SPI_TRANS_USE_TXDATA;
+
+    command.tx_data[0] = MIPI_DCS_SET_COLUMN_ADDRESS;
+    ESP_ERROR_CHECK(spi_device_polling_transmit(spi, &command));
+
+    data.tx_data[0] = x1 >> 8;
+    data.tx_data[1] = x1 & 0xff;
+    data.tx_data[2] = x2 >> 8;
+    data.tx_data[3] = x2 & 0xff;
+    ESP_ERROR_CHECK(spi_device_polling_transmit(spi, &data));
+
+    command.tx_data[0] = MIPI_DCS_SET_PAGE_ADDRESS;
+    ESP_ERROR_CHECK(spi_device_polling_transmit(spi, &command));
+
+    data.tx_data[0] = y1 >> 8;
+    data.tx_data[1] = y1 & 0xff;
+    data.tx_data[2] = y2 >> 8;
+    data.tx_data[3] = y2 & 0xff;
+    ESP_ERROR_CHECK(spi_device_polling_transmit(spi, &data));
+
+    command.tx_data[0] = MIPI_DCS_WRITE_MEMORY_START;
+    ESP_ERROR_CHECK(spi_device_polling_transmit(spi, &command));
+
+    data.rxlength = 0;
+    data.tx_buffer = bitmap;
     /* Transfer size in bits */
-    trans[5].length = size * DISPLAY_DEPTH;
+    data.length = size * DISPLAY_DEPTH;
     /* Clear SPI_TRANS_USE_TXDATA flag */
-    trans[5].flags = 0;
+    data.flags = 0;
 
-    for (x = 0; x <= 5; x++) {
-        ESP_ERROR_CHECK(spi_device_queue_trans(spi, &trans[x], portMAX_DELAY));
+    if (data.length > SPI_MAX_TRANSFER_SIZE / 2) {
+        ESP_ERROR_CHECK(spi_device_transmit(spi, &data));
+    } else {
+        ESP_ERROR_CHECK(spi_device_polling_transmit(spi, &data));
     }
-    /* Could do stuff here... */
-    mipi_display_wait(spi);
 
     xSemaphoreGive(mutex);
 }
@@ -316,4 +308,9 @@ void mipi_display_ioctl(spi_device_handle_t spi, const uint8_t command, uint8_t 
     }
 
     xSemaphoreGive(mutex);
+}
+
+void mipi_display_close(spi_device_handle_t spi)
+{
+    spi_device_release_bus(spi);
 }
