@@ -212,8 +212,6 @@ void mipi_display_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16
         return;
     }
 
-    int x;
-
     x1 = x1 + CONFIG_MIPI_DISPLAY_OFFSET_X;
     y1 = y1 + CONFIG_MIPI_DISPLAY_OFFSET_Y;
 
@@ -263,7 +261,12 @@ void mipi_display_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16
     data.length = size * DISPLAY_DEPTH;
     /* Clear SPI_TRANS_USE_TXDATA flag */
     data.flags = 0;
-    ESP_ERROR_CHECK(spi_device_polling_transmit(spi, &data));
+
+    if (data.length > SPI_MAX_TRANSFER_SIZE / 2) {
+        ESP_ERROR_CHECK(spi_device_transmit(spi, &data));
+    } else {
+        ESP_ERROR_CHECK(spi_device_polling_transmit(spi, &data));
+    }
 
     xSemaphoreGive(mutex);
 }
