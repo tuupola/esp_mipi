@@ -1,5 +1,5 @@
 # This file contains working settings for M5Stick-C.
-# To use it copy itto your project root before running menuconfig.
+# To use it copy it to your project root before running menuconfig.
 #
 # $ cp components/esp_mipi/m5stick-c.defaults sdkconfig.defaults
 # $ make menuconfig
