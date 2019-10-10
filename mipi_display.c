@@ -206,7 +206,7 @@ void mipi_display_init(spi_device_handle_t *spi)
 
 }
 
-void mipi_display_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint16_t *bitmap)
+void mipi_display_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint8_t *buffer)
 {
     if (0 == w || 0 == h) {
         return;
@@ -256,7 +256,7 @@ void mipi_display_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16
     ESP_ERROR_CHECK(spi_device_polling_transmit(spi, &command));
 
     data.rxlength = 0;
-    data.tx_buffer = bitmap;
+    data.tx_buffer = buffer;
     /* Transfer size in bits */
     data.length = size * DISPLAY_DEPTH;
     /* Clear SPI_TRANS_USE_TXDATA flag */
@@ -273,7 +273,7 @@ void mipi_display_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16
 
 void mipi_display_put_pixel(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t colour)
 {
-    mipi_display_blit(spi, x1, y1, 1, 1, &colour);
+    mipi_display_blit(spi, x1, y1, 1, 1, (uint8_t *) &colour);
 }
 
 void mipi_display_ioctl(spi_device_handle_t spi, const uint8_t command, uint8_t *data, size_t size)
