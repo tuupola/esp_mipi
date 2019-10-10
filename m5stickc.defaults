@@ -1,7 +1,10 @@
-# This file contains working settings for M5Stick-C.
+# This file contains working settings for M5StickC (ST7735S).
+# https://www.banggood.com/custlink/GmDKBVm6t9
+# https://m5stack.com/collections/m5-core/products/stick-c
+#
 # To use it copy it to your project root before running menuconfig.
 #
-# $ cp components/esp_mipi/m5stick-c.defaults sdkconfig.defaults
+# $ cp components/esp_mipi/m5stickc.defaults sdkconfig.defaults
 # $ make menuconfig
 
 CONFIG_MIPI_DCS_ADDRESS_MODE_MIRROR_Y_SELECTED=y
