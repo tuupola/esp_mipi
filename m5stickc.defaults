@@ -1,5 +1,7 @@
-# This file contains working settings for M5StickC (ST7735S).
+# This file contains working settings for M5StickC (80x160 ST7735S).
+#
 # https://www.banggood.com/custlink/GmDKBVm6t9
+# http://s.click.aliexpress.com/e/3DmuIePq
 # https://m5stack.com/collections/m5-core/products/stick-c
 #
 # To use it copy it to your project root before running menuconfig.

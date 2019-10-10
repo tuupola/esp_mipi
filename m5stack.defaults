@@ -1,5 +1,7 @@
 # This file contains working settings for M5Stack (320x240 ILI9341)
+#
 # https://www.banggood.com/custlink/DDvGgFKe52
+# http://s.click.aliexpress.com/e/qcq9nYW4
 # https://m5stack.com/collections/m5-core
 #
 # To use it copy it to your project root before running menuconfig.
