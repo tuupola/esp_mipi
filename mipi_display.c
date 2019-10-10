@@ -170,18 +170,19 @@ void mipi_display_init(spi_device_handle_t *spi)
 
     /* Init non spi gpio. */
     gpio_set_direction(CONFIG_MIPI_DISPLAY_PIN_DC, GPIO_MODE_OUTPUT);
-    gpio_set_direction(CONFIG_MIPI_DISPLAY_PIN_RST, GPIO_MODE_OUTPUT);
 
     /* Init spi driver. */
     mipi_display_spi_master_init(spi);
     vTaskDelay(100 / portTICK_RATE_MS);
 
     /* Reset the display. */
-    gpio_set_level(CONFIG_MIPI_DISPLAY_PIN_RST, 0);
-    vTaskDelay(100 / portTICK_RATE_MS);
-    gpio_set_level(CONFIG_MIPI_DISPLAY_PIN_RST, 1);
-    vTaskDelay(100 / portTICK_RATE_MS);
-
+    if (CONFIG_MIPI_DISPLAY_PIN_RST > 0) {
+        gpio_set_direction(CONFIG_MIPI_DISPLAY_PIN_RST, GPIO_MODE_OUTPUT);
+        gpio_set_level(CONFIG_MIPI_DISPLAY_PIN_RST, 0);
+        vTaskDelay(100 / portTICK_RATE_MS);
+        gpio_set_level(CONFIG_MIPI_DISPLAY_PIN_RST, 1);
+        vTaskDelay(100 / portTICK_RATE_MS);
+    }
 
     /* Send all the commands. */
     while (st_init_commands[cmd].bytes != 0xff) {
