@@ -58,3 +58,4 @@ void mipi_display_close(spi_device_handle_t spi);
 
 void mipi_display_blit(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint8_t *buffer);
 void mipi_display_put_pixel(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t colour);
+void mipi_display_push(spi_device_handle_t spi, uint8_t *buffer, uint32_t size);
