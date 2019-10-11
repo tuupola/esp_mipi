@@ -68,7 +68,7 @@ DRAM_ATTR static const lcd_init_cmd_t st_init_commands[] = {
 };
 
 /* Uses spi_device_transmit, which waits until the transfer is complete. */
-static void mipi_display_command(spi_device_handle_t spi, const uint8_t command)
+static void mipi_display_write_command(spi_device_handle_t spi, const uint8_t command)
 {
     spi_transaction_t transaction;
     memset(&transaction, 0, sizeof(transaction));
@@ -186,7 +186,7 @@ void mipi_display_init(spi_device_handle_t *spi)
 
     /* Send all the commands. */
     while (st_init_commands[cmd].bytes != 0xff) {
-        mipi_display_command(*spi, st_init_commands[cmd].cmd);
+        mipi_display_write_command(*spi, st_init_commands[cmd].cmd);
         mipi_display_write_data(*spi, st_init_commands[cmd].data, st_init_commands[cmd].bytes & 0x1F);
         if (st_init_commands[cmd].bytes & DELAY_BIT) {
             ESP_LOGD(TAG, "Delaying after command 0x%02x", (uint8_t)st_init_commands[cmd].cmd);
@@ -300,11 +300,11 @@ void mipi_display_ioctl(spi_device_handle_t spi, const uint8_t command, uint8_t 
         case MIPI_DCS_GET_POWER_SAVE:
         case MIPI_DCS_READ_DDB_START:
         case MIPI_DCS_READ_DDB_CONTINUE:
-            mipi_display_command(spi, command);
+            mipi_display_write_command(spi, command);
             mipi_display_read_data(spi, data, size);
             break;
         default:
-            mipi_display_command(spi, command);
+            mipi_display_write_command(spi, command);
             mipi_display_write_data(spi, data, size);
     }
 
