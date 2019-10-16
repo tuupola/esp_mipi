@@ -6,13 +6,22 @@ Low level driver for displays supporting the [MIPI Display Command Set](https://
 
 ## Usage
 
-Display and SPI parameters all the pins can be changed with `menuconfig`. Defaults are ok for M5Stack.
+Display and SPI parameters all the pins can be changed with `menuconfig`. You can find predefined values for some popular board in the [sdkconfig](https://github.com/tuupola/esp_mipi/tree/master/sdkconfig) folder. To use them copy one of the files to your project root before running menuconfig.
 
 ```
+$ cp components/esp_mipi/sdkconfig/m5stack.defaults sdkconfig.defaults
 $ make menuconfig
 ```
 
-Note that this is a low level driver. It provides only putpixel, blit and ioctl functions. It is meant to be used as a building block for a graphics library such as [copepod](https://github.com/tuupola/copepod). For basic usage see [MIPI driver speedtest](https://github.com/tuupola/esp-examples/tree/master/016-mipi-speedtest).
+If you have already run `menuconfig` before, do a `defconfig` first.
+
+```
+$ cp components/esp_mipi/sdkconfig/m5stack.defaults sdkconfig.defaults
+$ make defconfig
+$ make menuconfig
+```
+
+Note that this is a low level driver. It provides only `init`, `putpixel`, `blit`, `ioctl` and `close` functions. It is meant to be used as a building block for a graphics library such as [copepod](https://github.com/tuupola/copepod). For basic usage see also [MIPI driver speedtest](https://github.com/tuupola/esp-examples/tree/master/016-mipi-speedtest).
 
 ```c
 #include <driver/spi_master.h>
@@ -60,6 +69,12 @@ mipi_display_ioctl(spi, MIPI_DCS_ENTER_INVERT_MODE, 0, 0);
 /* Read display address mode setting. */
 uint8_t buffer[2];
 mipi_display_ioctl(spi, MIPI_DCS_GET_ADDRESS_MODE, buffer, 2);
+```
+
+For clean shutdown
+
+```c
+mipi_display_close();
 ```
 
 ## License
