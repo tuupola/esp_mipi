@@ -1,12 +1,12 @@
 # MIPI DCS Display Driver
 
-Low level driver for displays supporting the [MIPI Display Command Set](https://www.mipi.org/specifications/display-command-set). Currently tested with ST7735S, ST7789V and ILI9341.
+Low level driver for display controllers supporting the [MIPI Display Command Set](https://www.mipi.org/specifications/display-command-set). Tested with ST7735S, ST7789V and ILI9341.
 
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 
 ## Usage
 
-Display and SPI parameters all the pins can be changed with `menuconfig`. You can find predefined values for some popular board in the [sdkconfig](https://github.com/tuupola/esp_mipi/tree/master/sdkconfig) folder. To use them copy one of the files to your project root before running menuconfig.
+Display and SPI parameters all the pins can be changed with `menuconfig`. You can find predefined values for some popular boards in the [sdkconfig](https://github.com/tuupola/esp_mipi/tree/master/sdkconfig) folder. To use them copy one of the files to your project root before running menuconfig.
 
 ```
 $ cp components/esp_mipi/sdkconfig/m5stack.defaults sdkconfig.defaults
@@ -21,7 +21,7 @@ $ make defconfig
 $ make menuconfig
 ```
 
-Note that this is a low level driver. It provides only `init`, `write`, `ioctl` and `close` functions. It is meant to be used as a building block for a graphics library such as [copepod](https://github.com/tuupola/copepod). For basic usage see also [MIPI driver speedtest](https://github.com/tuupola/esp-examples/tree/master/016-mipi-speedtest).
+Note that this is a low level driver. It provides only `init`, `write`, `ioctl` and `close` functions. It is meant to be used together with hardware agnostic graphics library such as [copepod](https://github.com/tuupola/copepod). For example usage see also [MIPI driver speedtest](https://github.com/tuupola/esp-examples/tree/master/016-mipi-speedtest).
 
 ```c
 #include <driver/spi_master.h>
@@ -107,8 +107,6 @@ void app_main()
     /* Clean shutdown */
     mipi_display_close(spi);
 }
-```
-
 ```
 
 ## License
