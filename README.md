@@ -30,25 +30,56 @@ Note that this is a low level driver. It provides only `init`, `write`, `ioctl` 
 #include "mipi_display.h"
 
 spi_device_handle_t spi;
-mipi_display_init(&spi);
 
-/* Draw a random pixel on the screen. */
-uint16_t color = rand() % 0xffff;
-int16_t x0 = rand() % DISPLAY_WIDTH;
-int16_t y0 = rand() % DISPLAY_HEIGHT;
+void *memset16(uint16_t *source, uint16_t value, size_t count)
+{
+    uint16_t *ptr = source;
 
-mipi_display_write(spi, x0, y0, 1, 1, (uint8_t *) &color);
+    while (count--) {
+        *ptr++ = value;
+    }
+    return source;
+}
 
-/* Draw a random 32x32 rectangle on the screen. */
-uint16_t w = rand() % 32;
-uint16_t h = rand() % 32;
-int16_t x1 = rand() % (DISPLAY_HEIGHT - 32);
-int16_t y1 = rand() % (DISPLAY_HEIGHT - 32);
+void app_main()
+{
+    uint16_t color;
+    int16_t x0;
+    int16_t y0;
 
-uint8_t bitmap[32 * 32 * sizeof(uint16_t)];
-memset16(bitmap, color, 32 * 32 * sizeof(uint16_t));
+    mipi_display_init(&spi);
 
-mipi_display_write(spi, x1, y1, w, h, bitmap)
+    /* Initialise back buffer */
+    uint8_t *buffer = (uint8_t *) heap_caps_malloc(
+        (DISPLAY_WIDTH * (DISPLAY_DEPTH / 8) * DISPLAY_HEIGHT),
+        MALLOC_CAP_DMA | MALLOC_CAP_32BIT
+    );
+
+    /* Clear screen with black color */
+    memset16((uint16_t *) buffer, 0x0000, DISPLAY_WIDTH * DISPLAY_HEIGHT);
+    mipi_display_write(spi, 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, buffer);
+
+    /* Draw a 100 random pixels on the screen. */
+    for (uint8_t i = 0; i < 100; i++) {
+        x0 = rand() % DISPLAY_WIDTH;
+        y0 = rand() % DISPLAY_HEIGHT;
+        color = rand() % 0xffff;
+        mipi_display_write(spi, x0, y0, 1, 1, (uint8_t *) &color);
+    }
+
+    /* Draw 10 random 32x32 rectangles on the screen. */
+    for (uint8_t i = 0; i < 10; i++) {
+        x0 = rand() % (DISPLAY_WIDTH - 32);
+        y0 = rand() % (DISPLAY_HEIGHT - 32);
+        color = rand() % 0xffff;
+        memset16((uint16_t *) buffer, color, 32 * 32);
+        mipi_display_write(spi, x0, y0, 32, 32, buffer);
+    }
+
+    /* Clean shutdown */
+    mipi_display_close(spi);
+
+}
 ```
 
 You can also issue any command defined in [mipi_dcs.h](mipi_dcs.h).
@@ -61,20 +92,23 @@ You can also issue any command defined in [mipi_dcs.h](mipi_dcs.h).
 #include "mipi_display.h"
 
 spi_device_handle_t spi;
-mipi_display_init(&spi);
 
-/* Turn display inversion on. */
-mipi_display_ioctl(spi, MIPI_DCS_ENTER_INVERT_MODE, 0, 0);
+void app_main()
+{
+    mipi_display_init(&spi);
 
-/* Read display address mode setting. */
-uint8_t buffer[2];
-mipi_display_ioctl(spi, MIPI_DCS_GET_ADDRESS_MODE, buffer, 2);
+    /* Turn display inversion on. */
+    mipi_display_ioctl(spi, MIPI_DCS_ENTER_INVERT_MODE, 0, 0);
+
+    /* Read display address mode setting. */
+    uint8_t buffer[2];
+    mipi_display_ioctl(spi, MIPI_DCS_GET_ADDRESS_MODE, buffer, 2);
+
+    /* Clean shutdown */
+    mipi_display_close(spi);
+}
 ```
 
-For clean shutdown
-
-```c
-mipi_display_close();
 ```
 
 ## License
