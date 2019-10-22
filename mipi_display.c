@@ -67,7 +67,6 @@ DRAM_ATTR static const mipi_init_command_t init_commands[] = {
     {0, {0}, 0xff},
 };
 
-/* Uses spi_device_transmit, which waits until the transfer is complete. */
 static void mipi_display_write_command(spi_device_handle_t spi, const uint8_t command)
 {
     spi_transaction_t transaction;
@@ -120,14 +119,10 @@ static void mipi_display_read_data(spi_device_handle_t spi, uint8_t *data, size_
      /* DC needs to be set to 1 */
     transaction.user = (void *) 1;
 
-
-    ESP_LOG_BUFFER_HEX_LEVEL(TAG, data, length, ESP_LOG_WARN);
     ESP_ERROR_CHECK(spi_device_polling_transmit(spi, &transaction));
-    ESP_LOG_BUFFER_HEX_LEVEL(TAG, data, length, ESP_LOG_INFO);
 }
 
-
-/* This function is called (in irq context!) just before a transmission starts. */
+/* This function is called in irq context just before a transmission starts. */
 /* It will set the DC line to the value indicated in the user field. */
 static void mipi_display_pre_callback(spi_transaction_t *transaction)
 {
@@ -167,8 +162,6 @@ void mipi_display_init(spi_device_handle_t *spi)
 
 	gpio_set_direction(CONFIG_MIPI_DISPLAY_PIN_CS, GPIO_MODE_OUTPUT);
 	gpio_set_level(CONFIG_MIPI_DISPLAY_PIN_CS, 0);
-
-    /* Init non spi gpio. */
     gpio_set_direction(CONFIG_MIPI_DISPLAY_PIN_DC, GPIO_MODE_OUTPUT);
 
     /* Init spi driver. */
@@ -204,7 +197,6 @@ void mipi_display_init(spi_device_handle_t *spi)
     }
 
     spi_device_acquire_bus(*spi, portMAX_DELAY);
-
 }
 
 void mipi_display_write(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint8_t *buffer)
