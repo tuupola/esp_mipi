@@ -49,8 +49,8 @@ SOFTWARE.
 typedef struct {
     uint8_t cmd;
     uint8_t data[16];
-    uint8_t bytes;
-} init_command_t;
+    uint8_t count;
+} mipi_init_command_t;
 
 void mipi_display_init(spi_device_handle_t *spi);
 void mipi_display_write(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint8_t *buffer);

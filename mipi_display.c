@@ -52,7 +52,7 @@ static const uint8_t DELAY_BIT = 1 << 7;
 
 static SemaphoreHandle_t mutex;
 
-DRAM_ATTR static const init_command_t init_commands[] = {
+DRAM_ATTR static const mipi_init_command_t init_commands[] = {
     {MIPI_DCS_SOFT_RESET, {0}, 0 | DELAY_BIT},
     {MIPI_DCS_SET_ADDRESS_MODE, {MIPI_DISPLAY_ADDRESS_MODE}, 1},
     {MIPI_DCS_SET_PIXEL_FORMAT, {CONFIG_MIPI_DISPLAY_PIXEL_FORMAT}, 1},
@@ -185,10 +185,10 @@ void mipi_display_init(spi_device_handle_t *spi)
     }
 
     /* Send all the commands. */
-    while (init_commands[cmd].bytes != 0xff) {
+    while (init_commands[cmd].count != 0xff) {
         mipi_display_write_command(*spi, init_commands[cmd].cmd);
-        mipi_display_write_data(*spi, init_commands[cmd].data, init_commands[cmd].bytes & 0x1F);
-        if (init_commands[cmd].bytes & DELAY_BIT) {
+        mipi_display_write_data(*spi, init_commands[cmd].data, init_commands[cmd].count & 0x1F);
+        if (init_commands[cmd].count & DELAY_BIT) {
             ESP_LOGD(TAG, "Delaying after command 0x%02x", (uint8_t)init_commands[cmd].cmd);
             vTaskDelay(200 / portTICK_RATE_MS);
         }
