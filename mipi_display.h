@@ -47,7 +47,7 @@ SOFTWARE.
 )
 
 typedef struct {
-    uint8_t cmd;
+    uint8_t command;
     uint8_t data[16];
     uint8_t count;
 } mipi_init_command_t;

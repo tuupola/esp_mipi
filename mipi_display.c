@@ -75,7 +75,7 @@ static void mipi_display_write_command(spi_device_handle_t spi, const uint8_t co
 
     /* Command is 1 byte ie 8 bits */
     transaction.length = 1 * 8;
-    /* The data is the cmd itself */
+    /* The data is the command itself */
     transaction.tx_buffer = &command;
     /* DC needs to be set to 0. */
     transaction.user = (void *) 0;
@@ -186,10 +186,10 @@ void mipi_display_init(spi_device_handle_t *spi)
 
     /* Send all the commands. */
     while (init_commands[cmd].count != 0xff) {
-        mipi_display_write_command(*spi, init_commands[cmd].cmd);
+        mipi_display_write_command(*spi, init_commands[cmd].command);
         mipi_display_write_data(*spi, init_commands[cmd].data, init_commands[cmd].count & 0x1F);
         if (init_commands[cmd].count & DELAY_BIT) {
-            ESP_LOGD(TAG, "Delaying after command 0x%02x", (uint8_t)init_commands[cmd].cmd);
+            ESP_LOGD(TAG, "Delaying after command 0x%02x", (uint8_t)init_commands[cmd].command);
             vTaskDelay(200 / portTICK_RATE_MS);
         }
         cmd++;
