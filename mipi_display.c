@@ -1,7 +1,13 @@
 /*
 
+SPDX-License-Identifier: MIT
+
+-cut-
+
+MIT License
+
 Copyright (c) 2017-2018 Espressif Systems (Shanghai) PTE LTD
-Copyright (c) 2019 Mika Tuupola
+Copyright (c) 2019-2020 Mika Tuupola
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,12 +27,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-*/
-
-/*
+-cut-
 
 This code is based on Espressif provided SPI Master example which was
 released to Public Domain: https://goo.gl/ksC2Ln
+
+This file is part of the MIPI DCS Display Driver:
+https://github.com/tuupola/esp_mipi
 
 */
 
