@@ -1,7 +1,13 @@
 /*
 
+SPDX-License-Identifier: MIT
+
+-cut-
+
+MIT License
+
 Copyright (c) 2017-2018 Espressif Systems (Shanghai) PTE LTD
-Copyright (c) 2019 Mika Tuupola
+Copyright (c) 2019-2020 Mika Tuupola
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,12 +27,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-*/
-
-/*
+-cut-
 
 This code is based on Espressif provided SPI Master example which was
 released to Public Domain: https://goo.gl/ksC2Ln
+
+This file is part of the MIPI DCS Display Driver:
+https://github.com/tuupola/esp_mipi
 
 */
 
@@ -52,7 +59,7 @@ static const uint8_t DELAY_BIT = 1 << 7;
 
 static SemaphoreHandle_t mutex;
 
-DRAM_ATTR static const lcd_init_cmd_t st_init_commands[] = {
+DRAM_ATTR static const mipi_init_command_t init_commands[] = {
     {MIPI_DCS_SOFT_RESET, {0}, 0 | DELAY_BIT},
     {MIPI_DCS_SET_ADDRESS_MODE, {MIPI_DISPLAY_ADDRESS_MODE}, 1},
     {MIPI_DCS_SET_PIXEL_FORMAT, {CONFIG_MIPI_DISPLAY_PIXEL_FORMAT}, 1},
@@ -67,7 +74,6 @@ DRAM_ATTR static const lcd_init_cmd_t st_init_commands[] = {
     {0, {0}, 0xff},
 };
 
-/* Uses spi_device_transmit, which waits until the transfer is complete. */
 static void mipi_display_write_command(spi_device_handle_t spi, const uint8_t command)
 {
     spi_transaction_t transaction;
@@ -75,7 +81,7 @@ static void mipi_display_write_command(spi_device_handle_t spi, const uint8_t co
 
     /* Command is 1 byte ie 8 bits */
     transaction.length = 1 * 8;
-    /* The data is the cmd itself */
+    /* The data is the command itself */
     transaction.tx_buffer = &command;
     /* DC needs to be set to 0. */
     transaction.user = (void *) 0;
@@ -120,14 +126,10 @@ static void mipi_display_read_data(spi_device_handle_t spi, uint8_t *data, size_
      /* DC needs to be set to 1 */
     transaction.user = (void *) 1;
 
-
-    ESP_LOG_BUFFER_HEX_LEVEL(TAG, data, length, ESP_LOG_WARN);
     ESP_ERROR_CHECK(spi_device_polling_transmit(spi, &transaction));
-    ESP_LOG_BUFFER_HEX_LEVEL(TAG, data, length, ESP_LOG_INFO);
 }
 
-
-/* This function is called (in irq context!) just before a transmission starts. */
+/* This function is called in irq context just before a transmission starts. */
 /* It will set the DC line to the value indicated in the user field. */
 static void mipi_display_pre_callback(spi_transaction_t *transaction)
 {
@@ -167,8 +169,6 @@ void mipi_display_init(spi_device_handle_t *spi)
 
 	gpio_set_direction(CONFIG_MIPI_DISPLAY_PIN_CS, GPIO_MODE_OUTPUT);
 	gpio_set_level(CONFIG_MIPI_DISPLAY_PIN_CS, 0);
-
-    /* Init non spi gpio. */
     gpio_set_direction(CONFIG_MIPI_DISPLAY_PIN_DC, GPIO_MODE_OUTPUT);
 
     /* Init spi driver. */
@@ -185,11 +185,11 @@ void mipi_display_init(spi_device_handle_t *spi)
     }
 
     /* Send all the commands. */
-    while (st_init_commands[cmd].bytes != 0xff) {
-        mipi_display_write_command(*spi, st_init_commands[cmd].cmd);
-        mipi_display_write_data(*spi, st_init_commands[cmd].data, st_init_commands[cmd].bytes & 0x1F);
-        if (st_init_commands[cmd].bytes & DELAY_BIT) {
-            ESP_LOGD(TAG, "Delaying after command 0x%02x", (uint8_t)st_init_commands[cmd].cmd);
+    while (init_commands[cmd].count != 0xff) {
+        mipi_display_write_command(*spi, init_commands[cmd].command);
+        mipi_display_write_data(*spi, init_commands[cmd].data, init_commands[cmd].count & 0x1F);
+        if (init_commands[cmd].count & DELAY_BIT) {
+            ESP_LOGD(TAG, "Delaying after command 0x%02x", (uint8_t)init_commands[cmd].command);
             vTaskDelay(200 / portTICK_RATE_MS);
         }
         cmd++;
@@ -204,7 +204,6 @@ void mipi_display_init(spi_device_handle_t *spi)
     }
 
     spi_device_acquire_bus(*spi, portMAX_DELAY);
-
 }
 
 void mipi_display_write(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint16_t w, uint16_t h, uint8_t *buffer)
@@ -272,7 +271,7 @@ void mipi_display_write(spi_device_handle_t spi, uint16_t x1, uint16_t y1, uint1
     xSemaphoreGive(mutex);
 }
 
-void mipi_display_push(spi_device_handle_t spi, uint8_t *buffer, uint32_t size)
+void mipi_display_push(spi_device_handle_t spi, uint8_t *buffer, size_t size)
 {
     if (0 == size) {
         return;

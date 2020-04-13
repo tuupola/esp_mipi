@@ -82,7 +82,7 @@ void app_main()
 }
 ```
 
-You can also issue any command defined in [mipi_dcs.h](mipi_dcs.h).
+You can also issue any command defined in [mipi_dcs.h](mipi_dcs.h). Commands   reading from display are untested at the moment. I do not have a board with MISO connected.
 
 ```c
 #include <driver/spi_master.h>
