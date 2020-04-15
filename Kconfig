@@ -89,7 +89,7 @@ config MIPI_DISPLAY_INVERT
 
 config MIPI_DCS_ADDRESS_MODE_BGR_SELECTED
     bool "BGR"
-    default y
+    default n
 
 config MIPI_DCS_ADDRESS_MODE_BGR
     hex
