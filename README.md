@@ -21,7 +21,7 @@ $ make defconfig
 $ make menuconfig
 ```
 
-Note that this is a low level driver. It provides only `init`, `write`, `ioctl` and `close` functions. It is meant to be used together with hardware agnostic graphics library such as [copepod](https://github.com/tuupola/copepod). For example usage see also [MIPI driver speedtest](https://github.com/tuupola/esp-examples/tree/master/016-mipi-speedtest).
+Note that this is a low level driver. It provides only `init`, `write`, `ioctl` and `close` functions. It is meant to be used together with hardware agnostic graphics library such as [HAGL](https://github.com/tuupola/hagl). For example usage see also [MIPI driver speedtest](https://github.com/tuupola/esp-examples/tree/master/016-mipi-speedtest).
 
 ```c
 #include <driver/spi_master.h>
